@@ -68,7 +68,8 @@ import GalleryModal from "./GalleryModal";
 import StatusModal from "./StatusModal";
 import PartyModal from "./PartyModal";
 import LazyImage from "./LazyImage";
-import { getGameplaySystemInstruction } from "../utils/gameplaySystemInstruction2";
+import { getGameplaySystemInstruction } from "../utils/gameplaySystemInstruction";
+import { getGameplaySystemInstruction as getCoreRules } from "../utils/gameplaySystemInstruction2";
 import { buildDetailedRecentTurnsMemories, synthesizeTurnStoryMemory } from "../utils/memoryUtils";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -2350,11 +2351,11 @@ export default function Gameplay() {
     ]
       .filter(item => item && item.npc)
       .map(({ npc, index, isLite }) => {
-        const currentNpcLoc = latestAiMsg?.npcLocations?.find(
+        const currentNpcLoc = Array.isArray(latestAiMsg?.npcLocations) ? latestAiMsg.npcLocations.find(
           (loc: any) =>
             loc && npc &&
             (loc.id === npc.name || loc.id === npc.fullName || (loc as any).name === npc.name || (loc as any).name === npc.fullName || (npc.fullName && loc.id && npc.fullName.includes(loc.id)) || (npc.name && loc.id && npc.name.includes(loc.id))),
-        )?.location;
+        )?.location : undefined;
 
         const isCurrentUnknown =
           !currentNpcLoc ||
@@ -3291,6 +3292,9 @@ ${dramaPromptText ? `- GỢI Ý/YÊU CẦU KỊCH TÍNH TỪ NGƯỜI CHƠI (AI 
       gameData?.disableDefaultNpcRelationships || false
     );
     
+    // Append core rules
+    systemInstruction += "\n\n" + getCoreRules(isHardModeEnabled, useStore.getState().actionSuggestionsConfig || "", isVNDialogueModeEnabled);
+
     // [PATCH] Final scrub of the system instruction to catch any leaked old tags from user presets or other places
     systemInstruction = systemInstruction.replace(/<json_ToMau>[\s\S]*?<\/json_ToMau>/g, "");
     systemInstruction = systemInstruction.replace(/\[mau:dâm thủy\]/gi, "[damThuy:dâm thủy]");
