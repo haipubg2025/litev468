@@ -386,8 +386,9 @@ HƯỚNG DẪN ÁP DỤNG THÔNG SỐ:
         clearTimeout(timeoutId);
 
         // Nếu gặp lỗi 404, tức là website được deploy tĩnh (Netlify, GitHub Pages...) không có server Node.js chạy ngầm!
-        if (response.status === 404) {
-          console.warn("[AI Service] Phát hiện lỗi 404 tại /api/generate-stream. Tự động chuyển mạch sang chế độ Gọi trực tiếp từ Trình duyệt (Direct Client-Side Fallback)...");
+        // Nếu gặp lỗi 50x (500, 502, 504), có thể do backend bị server chặn kết nối (Zeabur / Cloudflare block GCP IP)
+        if (response.status === 404 || response.status >= 500) {
+          console.warn(`[AI Service] Phát hiện lỗi ${response.status} tại backend. Tự động chuyển mạch sang chế độ Gọi trực tiếp từ Trình duyệt (Direct Client-Side Fallback)...`);
           yield* this.generateDirectClientStream(resolvedPrompt, schema, combinedSystemInstruction, currentApiKey, activeProxy, temperature, imagesBase64, topP, topK);
           return;
         }

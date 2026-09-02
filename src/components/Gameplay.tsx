@@ -1398,9 +1398,11 @@ const applyNpcUpdates = (npcs: any[], npcUpdatesSource: any) => {
       // Priority 2: Exact Name / FullName match
       if (nName && nName === targetStr) return true;
       if (nFullName && nFullName === targetStr) return true;
-      // Priority 3: Substring match
-      if (nName && (targetStr.includes(nName) || nName.includes(targetStr))) return true;
-      if (nFullName && (targetStr.includes(nFullName) || nFullName.includes(targetStr))) return true;
+      // Priority 3: Stricter substring match (only if both strings are long enough to avoid false positives)
+      if (targetStr.length > 3) {
+        if (nName && nName.length > 3 && (targetStr === nName || targetStr.startsWith(nName + " ") || targetStr.endsWith(" " + nName) || nName.startsWith(targetStr + " ") || nName.endsWith(" " + targetStr))) return true;
+        if (nFullName && nFullName.length > 3 && (targetStr === nFullName || targetStr.startsWith(nFullName + " ") || targetStr.endsWith(" " + nFullName) || nFullName.startsWith(targetStr + " ") || nFullName.endsWith(" " + targetStr))) return true;
+      }
 
       return false;
     });
@@ -2313,7 +2315,7 @@ export default function Gameplay() {
             const locObj = msg.npcLocations.find(
               (loc: any) =>
                 loc && npc &&
-                (loc.id === npc.name || loc.id === npc.fullName || (loc as any).name === npc.name || (loc as any).name === npc.fullName || (npc.fullName && loc.id && npc.fullName.includes(loc.id)) || (npc.name && loc.id && npc.name.includes(loc.id))),
+                ((loc.id && npc.id && loc.id.toLowerCase().trim() === String(npc.id).toLowerCase().trim()) || (loc.id && npc.name && loc.id.toLowerCase().trim() === String(npc.name).toLowerCase().trim()) || (loc.id && npc.fullName && loc.id.toLowerCase().trim() === String(npc.fullName).toLowerCase().trim()) || (loc.name && npc.id && loc.name.toLowerCase().trim() === String(npc.id).toLowerCase().trim()) || (loc.name && npc.name && loc.name.toLowerCase().trim() === String(npc.name).toLowerCase().trim()) || (loc.name && npc.fullName && loc.name.toLowerCase().trim() === String(npc.fullName).toLowerCase().trim())),
             );
             if (locObj) {
               const cleanOldLoc = (locObj.location || "")
@@ -2354,7 +2356,7 @@ export default function Gameplay() {
         const currentNpcLoc = Array.isArray(latestAiMsg?.npcLocations) ? latestAiMsg.npcLocations.find(
           (loc: any) =>
             loc && npc &&
-            (loc.id === npc.name || loc.id === npc.fullName || (loc as any).name === npc.name || (loc as any).name === npc.fullName || (npc.fullName && loc.id && npc.fullName.includes(loc.id)) || (npc.name && loc.id && npc.name.includes(loc.id))),
+            ((loc.id && npc.id && loc.id.toLowerCase().trim() === String(npc.id).toLowerCase().trim()) || (loc.id && npc.name && loc.id.toLowerCase().trim() === String(npc.name).toLowerCase().trim()) || (loc.id && npc.fullName && loc.id.toLowerCase().trim() === String(npc.fullName).toLowerCase().trim()) || (loc.name && npc.id && loc.name.toLowerCase().trim() === String(npc.id).toLowerCase().trim()) || (loc.name && npc.name && loc.name.toLowerCase().trim() === String(npc.name).toLowerCase().trim()) || (loc.name && npc.fullName && loc.name.toLowerCase().trim() === String(npc.fullName).toLowerCase().trim())),
         )?.location : undefined;
 
         const isCurrentUnknown =
@@ -3702,7 +3704,7 @@ ${dramaPromptText ? `- GỢI Ý/YÊU CẦU KỊCH TÍNH TỪ NGƯỜI CHƠI (AI 
             parsedData.npcLocations.forEach((npcLoc: any) => {
               if (npcLoc && npcLoc.id && typeof npcLoc.location === "string") {
                 const npcIndex = newData.npcs.findIndex(
-                  (n: any) => n && (n.id === npcLoc.id || n.name === npcLoc.id || n.fullName === npcLoc.id || (n.fullName && npcLoc.id && n.fullName.includes(npcLoc.id)) || (n.name && npcLoc.id && n.name.includes(npcLoc.id)) || (npcLoc.name && (n.name === npcLoc.name || n.fullName === npcLoc.name)))
+                  (n: any) => n && ((n.id && npcLoc.id && n.id.toLowerCase().trim() === npcLoc.id.toLowerCase().trim()) || (n.name && npcLoc.id && n.name.toLowerCase().trim() === npcLoc.id.toLowerCase().trim()) || (n.fullName && npcLoc.id && n.fullName.toLowerCase().trim() === npcLoc.id.toLowerCase().trim()) || (n.name && npcLoc.name && n.name.toLowerCase().trim() === npcLoc.name.toLowerCase().trim()) || (n.fullName && npcLoc.name && n.fullName.toLowerCase().trim() === npcLoc.name.toLowerCase().trim()))
                 );
                 if (npcIndex !== -1 && newData.npcs[npcIndex].location !== npcLoc.location) {
                   newData.npcs[npcIndex].location = npcLoc.location;

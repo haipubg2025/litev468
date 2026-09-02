@@ -48,6 +48,7 @@ export function getGameplaySystemInstruction(
 6. NHẬN DIỆN DỮ LIỆU STATUS VÀ LOCATION:
 - LƯU Ý QUAN TRỌNG: Khi xử lý lượt chơi, AI CHỈ NHẬN ĐƯỢC CÁC DỮ LIỆU MỚI NHẤT (hiện tại) của Status (trạng thái) và Location (vị trí) từ bảng thông tin nhân vật.
 - Hệ thống KHÔNG LƯU GIỮ hay cung cấp lịch sử các trạng thái cũ. Do đó, AI tuyệt đối không được ảo giác, tự suy diễn hay bám chấp vào các trạng thái/vị trí trong quá khứ nếu chúng không còn tồn tại trong bảng dữ liệu mới nhất. Mọi quyết định và miêu tả đều phải dựa trên cơ sở Status và Location hiện tại.
+- CỰC KỲ QUAN TRỌNG: Dữ liệu về Status và Location của TỪNG NPC là HOÀN TOÀN RIÊNG BIỆT và KHÔNG DÙNG CHUNG. AI tuyệt đối không được gán ghép lung tung, nhầm lẫn hay lấy vị trí/trạng thái của nhân vật này áp đặt cho nhân vật khác. Thông tin của nhân vật nào thì PHẢI dùng chính xác và độc lập cho nhân vật đó.
 
 7. VĂN PHONG GỌI TÊN GIA TỘC / GIA ĐÌNH (CỔ TRANG, TIÊN HIỆP, HUYỄN HUYỄN):
 - Khi bối cảnh mang phong cách phương Đông (Cổ trang, Tiên hiệp, Kiếm hiệp...), TUYỆT ĐỐI CẤM dùng kiểu hành văn lủng củng, lai căng như "gia tộc [Tên]" hoặc "gia tộc họ [Tên]".

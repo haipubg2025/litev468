@@ -17,69 +17,96 @@ async function startServer() {
   // API route for fetching models from a given proxy URL
   app.post("/api/proxy-models", async (req, res) => {
     try {
-      const { baseUrl, key, format } = req.body;
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json'
+      const { baseUrl, format } = req.body;
+      const key = req.body.key ? req.body.key.trim() : '';
+      const baseHeaders: Record<string, string> = {
+        'Content-Type': 'application/json',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
       };
 
+      // We won't add Authorization to baseHeaders globally anymore to prevent Gemini conflicts
+      const openaiHeaders = { ...baseHeaders };
+      if (key) openaiHeaders['Authorization'] = `Bearer ${key}`;
+
+      const geminiHeaders = { ...baseHeaders };
       if (key) {
-        headers['Authorization'] = `Bearer ${key}`;
+        geminiHeaders['x-goog-api-key'] = key;
+        // Many custom proxies (like GG公益站) require Authorization header even for Gemini format
+        if (!baseUrl.includes('generativelanguage.googleapis.com')) {
+          geminiHeaders['Authorization'] = `Bearer ${key}`;
+        }
       }
 
-      // Prepare possible URLs based on format
+      // Prepare possible requests based on format
       let cleanedUrl = baseUrl.trim().replace(/\/+$/, '');
       if (cleanedUrl.endsWith('/chat/completions')) {
         cleanedUrl = cleanedUrl.replace(/\/chat\/completions$/, '');
       }
-      let possibleUrls: string[] = [];
+      
+      const possibleRequests: { url: string, headers: Record<string, string> }[] = [];
       let baseWithoutSuffix = cleanedUrl.replace(/\/v1$/, '').replace(/\/v1beta$/, '');
 
       if (format === 'openai') {
-        possibleUrls.push(`${baseWithoutSuffix}/v1/models`);
+        possibleRequests.push({ url: `${baseWithoutSuffix}/v1/models`, headers: openaiHeaders });
       } else if (format === 'gemini') {
-        if (key) headers['x-goog-api-key'] = key;
-        possibleUrls.push(`${baseWithoutSuffix}/v1beta/models?key=${key}`);
-        possibleUrls.push(`${baseWithoutSuffix}/v1beta/models`);
+        possibleRequests.push({ url: `${baseWithoutSuffix}/v1beta/models?key=${key}`, headers: geminiHeaders });
+        possibleRequests.push({ url: `${baseWithoutSuffix}/v1beta/models`, headers: geminiHeaders });
       } else {
-        // auto - try both, but let's be smart about headers
-        // We'll add x-goog-api-key just in case it's gemini
-        if (key) headers['x-goog-api-key'] = key;
-        possibleUrls.push(`${baseWithoutSuffix}/v1/models`);
-        possibleUrls.push(`${baseWithoutSuffix}/v1beta/models?key=${key}`);
-        possibleUrls.push(`${baseWithoutSuffix}/v1beta/models`);
+        // auto
+        possibleRequests.push({ url: `${baseWithoutSuffix}/v1/models`, headers: openaiHeaders });
+        possibleRequests.push({ url: `${baseWithoutSuffix}/v1beta/models?key=${key}`, headers: geminiHeaders });
+        possibleRequests.push({ url: `${baseWithoutSuffix}/v1beta/models`, headers: geminiHeaders });
       }
 
       // Also include the original requested URL just in case
-      if (!possibleUrls.includes(`${cleanedUrl}/models`)) {
-        possibleUrls.push(`${cleanedUrl}/models`);
+      if (!possibleRequests.some(r => r.url === `${cleanedUrl}/models`)) {
+        possibleRequests.push({ url: `${cleanedUrl}/models`, headers: openaiHeaders });
       }
 
       let data = null;
       let lastError = null;
 
-      for (const url of possibleUrls) {
+      for (const reqConfig of possibleRequests) {
         try {
-          const response = await fetch(url, { headers });
+          const response = await fetch(reqConfig.url, { 
+            headers: reqConfig.headers,
+            signal: AbortSignal.timeout(15000)
+          });
           if (response.ok) {
             data = await response.json();
             break;
           } else {
             const errText = await response.text();
             lastError = new Error(`HTTP ${response.status}: ${errText.substring(0, 200)}`);
+            
+            // If authentication failed, stop trying other endpoints, the key is clearly invalid
+            if (response.status === 401 || response.status === 403) {
+              break;
+            }
+
             // If it failed but there's a key and no query param, try with query param
-            if (key && !url.includes('?key=')) {
-              const altResponse = await fetch(`${url}?key=${key}`, { headers });
+            if (key && !reqConfig.url.includes('?key=')) {
+              const altResponse = await fetch(`${reqConfig.url}?key=${key}`, { 
+                headers: reqConfig.headers,
+                signal: AbortSignal.timeout(15000)
+              });
               if (altResponse.ok) {
                 data = await altResponse.json();
                 break;
               } else {
-                const altErrText = await altResponse.text();
-                lastError = new Error(`HTTP ${altResponse.status}: ${altErrText.substring(0, 200)}`);
+                 const altErrText = await altResponse.text();
+                 lastError = new Error(`HTTP ${altResponse.status}: ${altErrText.substring(0, 200)}`);
+                 if (altResponse.status === 401 || altResponse.status === 403) {
+                   break;
+                 }
               }
             }
           }
-        } catch (err) {
+        } catch (err: any) {
           lastError = err;
+          if (err.name === 'TimeoutError' || err.message.includes('fetch failed')) {
+            break;
+          }
         }
       }
 
@@ -320,10 +347,18 @@ async function startServer() {
         try {
            const headers: Record<string, string> = {
              'Content-Type': 'application/json',
-             'Authorization': `Bearer ${activeProxy.key}`
+             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
            };
-           if (!isOAI) {
-             headers['x-goog-api-key'] = activeProxy.key;
+           if (activeProxy.key) {
+             const proxyKey = activeProxy.key.trim();
+             if (isOAI) {
+               headers['Authorization'] = `Bearer ${proxyKey}`;
+             } else {
+               headers['x-goog-api-key'] = proxyKey;
+               if (!activeProxy.url.includes('generativelanguage.googleapis.com')) {
+                 headers['Authorization'] = `Bearer ${proxyKey}`;
+               }
+             }
            }
 
            const proxyStreamRes = await fetch(targetUrl, {

@@ -321,62 +321,93 @@ export default function Settings() {
           }
           let baseWithoutSuffix = cleanedUrl.replace(/\/v1$/, '').replace(/\/v1beta$/, '');
           
-          let possibleUrls: string[] = [];
-          if (proxy.format === 'openai') {
-            possibleUrls.push(`${baseWithoutSuffix}/v1/models`);
-          } else if (proxy.format === 'gemini') {
-            possibleUrls.push(`${baseWithoutSuffix}/v1beta/models?key=${proxy.key}`);
-            possibleUrls.push(`${baseWithoutSuffix}/v1beta/models`);
-          } else {
-            possibleUrls.push(`${baseWithoutSuffix}/v1/models`);
-            possibleUrls.push(`${baseWithoutSuffix}/v1beta/models?key=${proxy.key}`);
-            possibleUrls.push(`${baseWithoutSuffix}/v1beta/models`);
-          }
-          if (!possibleUrls.includes(`${cleanedUrl}/models`)) {
-            possibleUrls.push(`${cleanedUrl}/models`);
+          let possibleRequests: { url: string, headers: Record<string, string> }[] = [];
+          
+          const proxyKey = proxy.key ? proxy.key.trim() : '';
+
+          const baseDirectHeaders: Record<string, string> = {};
+
+          const openaiHeaders = { ...baseDirectHeaders };
+          if (proxyKey) {
+             openaiHeaders['Authorization'] = `Bearer ${proxyKey}`;
           }
 
-          const directHeaders: Record<string, string> = {};
-          if (proxy.key) {
-             directHeaders['Authorization'] = `Bearer ${proxy.key}`;
-             if (proxy.format === 'gemini' || proxy.format === 'auto') {
-               directHeaders['x-goog-api-key'] = proxy.key;
+          const geminiHeaders = { ...baseDirectHeaders };
+          if (proxyKey) {
+             geminiHeaders['x-goog-api-key'] = proxyKey;
+             if (!proxy.url.includes('generativelanguage.googleapis.com')) {
+               geminiHeaders['Authorization'] = `Bearer ${proxyKey}`;
              }
           }
+
+          if (proxy.format === 'openai') {
+            possibleRequests.push({ url: `${baseWithoutSuffix}/v1/models`, headers: openaiHeaders });
+          } else if (proxy.format === 'gemini') {
+            possibleRequests.push({ url: `${baseWithoutSuffix}/v1beta/models?key=${proxyKey}`, headers: geminiHeaders });
+            possibleRequests.push({ url: `${baseWithoutSuffix}/v1beta/models`, headers: geminiHeaders });
+          } else {
+            possibleRequests.push({ url: `${baseWithoutSuffix}/v1/models`, headers: openaiHeaders });
+            possibleRequests.push({ url: `${baseWithoutSuffix}/v1beta/models?key=${proxyKey}`, headers: geminiHeaders });
+            possibleRequests.push({ url: `${baseWithoutSuffix}/v1beta/models`, headers: geminiHeaders });
+          }
+          if (!possibleRequests.some(r => r.url === `${cleanedUrl}/models`)) {
+            possibleRequests.push({ url: `${cleanedUrl}/models`, headers: openaiHeaders });
+          }
           
-          for (const url of possibleUrls) {
+          let clientErrorMsg = "";
+          for (const reqConfig of possibleRequests) {
             try {
-              const directRes = await fetch(url, { headers: directHeaders });
-              if (directRes.ok) {
-                 data = await directRes.json();
-                 fetchSuccess = true;
-                 break;
-              } else {
-                 if (proxy.key && !url.includes('?key=')) {
-                   const altRes = await fetch(`${url}?key=${proxy.key}`, { headers: directHeaders });
-                   if (altRes.ok) {
-                     data = await altRes.json();
-                     fetchSuccess = true;
-                     break;
-                   }
-                 }
-              }
-            } catch (ignored) {}
+               const directRes = await fetch(reqConfig.url, { headers: reqConfig.headers });
+               if (directRes.ok) {
+                  data = await directRes.json();
+                  fetchSuccess = true;
+                  break;
+               } else {
+                  clientErrorMsg = `HTTP ${directRes.status} từ trình duyệt`;
+                  if (directRes.status === 401 || directRes.status === 403) {
+                    break;
+                  }
+                  if (proxyKey && !reqConfig.url.includes('?key=')) {
+                    const altRes = await fetch(`${reqConfig.url}?key=${proxyKey}`, { headers: reqConfig.headers });
+                    if (altRes.ok) {
+                      data = await altRes.json();
+                      fetchSuccess = true;
+                      break;
+                    } else if (altRes.status === 401 || altRes.status === 403) {
+                      break;
+                    }
+                  }
+               }
+            } catch (err: any) {
+               clientErrorMsg = err.message || "Failed to fetch (CORS block)";
+            }
           }
           
           if (!fetchSuccess) {
-            // Silently try CORS proxy as last resort
-            for (const url of possibleUrls) {
-              try {
-                const corsUrl = `https://corsproxy.io/?${encodeURIComponent(url)}`;
-                const corsRes = await fetch(corsUrl, { headers: directHeaders });
-                if (corsRes.ok) {
-                   data = await corsRes.json();
-                   fetchSuccess = true;
-                   break;
-                }
-              } catch (ignored) {}
+            // Silently try CORS proxies as last resort
+            const corsProxies = [
+              (url: string) => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+              (url: string) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`
+            ];
+            
+            for (const proxyBuilder of corsProxies) {
+              if (fetchSuccess) break;
+              for (const reqConfig of possibleRequests) {
+                try {
+                  const corsUrl = proxyBuilder(reqConfig.url);
+                  const corsRes = await fetch(corsUrl, { headers: reqConfig.headers });
+                  if (corsRes.ok) {
+                     data = await corsRes.json();
+                     fetchSuccess = true;
+                     break;
+                  }
+                } catch (ignored) {}
+              }
             }
+          }
+          
+          if (!fetchSuccess && clientErrorMsg) {
+             serverErrorMsg = `Backend: ${serverErrorMsg} | Client: ${clientErrorMsg}`;
           }
         }
         
@@ -523,8 +554,8 @@ export default function Settings() {
       const geminiKeys = workingText.match(geminiRegex) || [];
       geminiKeys.forEach(k => workingText = workingText.replace(k, ' '));
       
-      // 2. Lọc tất cả Proxy Keys đặc thù (vd: gg-gcli, sk-*, pk-*, dài >= 15)
-      const specificKeyRegex = /(?:gg-gcli-|sk-[a-zA-Z0-9]+-|pk-[a-zA-Z0-9]+-|sk-)[A-Za-z0-9_\-]{15,}/gi;
+      // 2. Lọc tất cả Proxy Keys đặc thù (vd: gg-*, sk-*, pk-*, dài >= 15)
+      const specificKeyRegex = /(?:gg-[a-zA-Z0-9\-]+-|sk-[a-zA-Z0-9]+-|pk-[a-zA-Z0-9]+-|sk-)[A-Za-z0-9_\-]{15,}/gi;
       const specificKeys = workingText.match(specificKeyRegex) || [];
       specificKeys.forEach(k => workingText = workingText.replace(k, ' '));
 
