@@ -1803,11 +1803,11 @@ const autoColorizeQuotes = (
     wrapWithSpan(regexAmThanh, "amThanhMoiTruong");
 
     // 2.5 Auto-colorize untagged raw brackets [Skill/Item/Name] (e.g. [Làm Sạch]) if AI forgot key
-    text = text.replace(/(?<![a-zA-Z0-9_="'#])\[([^\[\]:<>\n]{2,40})\](?!\()/g, (match, innerContent) => {
+    text = text.replace(/(^|[^a-zA-Z0-9_="'#])\[([^\[\]:<>\n]{2,40})\](?!\()/g, (match, prefix, innerContent) => {
       const trimmed = innerContent.trim();
       if (!trimmed || isPlaceholder(trimmed)) return match;
       const color = getColor("kyNang") || getColor("itemConLai") || getColor("vatPham") || "#2DD4BF";
-      return color ? wrapHtmlSpan(color, `[${trimmed}]`) : match;
+      return color ? prefix + wrapHtmlSpan(color, `[${trimmed}]`) : match;
     });
 
     // 3. Fallback Auto-Colorize character names, nicknames, full names & titles in prose if AI forgot tag
@@ -1893,10 +1893,10 @@ const autoColorizeQuotes = (
           if (!colorHex) return;
 
           const escaped = escapeRegExp(targetName);
-          const nameRegex = new RegExp(`(?<![a-zA-Z0-9_À-ỹ])${escaped}(?![a-zA-Z0-9_À-ỹ])`, 'gi');
-
-          text = text.replace(nameRegex, (match, offset, fullStr) => {
-            const preText = fullStr.slice(0, offset);
+          const nameRegex = new RegExp(`(^|[^a-zA-Z0-9_À-ỹ])(${escaped})(?![a-zA-Z0-9_À-ỹ])`, 'gi');
+          text = text.replace(nameRegex, (match, prefix, capturedName, offset, fullStr) => {
+            const actualOffset = offset + prefix.length;
+            const preText = fullStr.slice(0, actualOffset);
             const openSpans = (preText.match(/<span\b[^>]*>/gi) || []).length;
             const closeSpans = (preText.match(/<\/span>/gi) || []).length;
             if (openSpans > closeSpans) {
@@ -1912,7 +1912,7 @@ const autoColorizeQuotes = (
             if (lastOpenBracket > lastCloseBracket) {
               return match;
             }
-            return wrapHtmlSpan(colorHex, match);
+            return prefix + wrapHtmlSpan(colorHex, capturedName);
           });
         } catch (e) {
           // ignore single name error
@@ -1940,10 +1940,10 @@ const autoColorizeQuotes = (
         bodyPartTerms.forEach((term) => {
           try {
             const escaped = escapeRegExp(term);
-            const termRegex = new RegExp(`(?<![a-zA-Z0-9_À-ỹ])${escaped}(?![a-zA-Z0-9_À-ỹ])`, 'gi');
-
-            text = text.replace(termRegex, (match, offset, fullStr) => {
-              const preText = fullStr.slice(0, offset);
+            const termRegex = new RegExp(`(^|[^a-zA-Z0-9_À-ỹ])(${escaped})(?![a-zA-Z0-9_À-ỹ])`, 'gi');
+            text = text.replace(termRegex, (match, prefix, capturedName, offset, fullStr) => {
+              const actualOffset = offset + prefix.length;
+              const preText = fullStr.slice(0, actualOffset);
               const openSpans = (preText.match(/<span\b[^>]*>/gi) || []).length;
               const closeSpans = (preText.match(/<\/span>/gi) || []).length;
               if (openSpans > closeSpans) {
@@ -1959,7 +1959,7 @@ const autoColorizeQuotes = (
               if (lastOpenBracket > lastCloseBracket) {
                 return match; // Inside raw bracket tag e.g. [coThe:làn da]
               }
-              return wrapHtmlSpan(coTheColorHex, match);
+              return prefix + wrapHtmlSpan(coTheColorHex, capturedName);
             });
           } catch (e) {
             // ignore

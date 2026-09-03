@@ -184,7 +184,7 @@ export function filterSensitiveWords(text: string, worldTags: string[] = []): st
     replaceCase(/thành\s+thạo(?=\s+(?:của|đường|vẻ|vóc|thân|bầu|dáng|nét))/gi, "thành thục");
     replaceCase(/tiền\s+phong/gi, "tiên phong");
     replaceCase(/tiền\s+đạo/gi, "tiên phong");
-    sanitized = sanitized.replace(/(?:khóe\s+môi|khẽ\s+nhếch|môi)?(?:\s*\.\.\.|\s*,\s*|\s+)?(?<![a-zA-Z0-9_À-ỹ])à\s+không(?![a-zA-Z0-9_À-ỹ])/gi, "");
+    sanitized = sanitized.replace(/(^|[^a-zA-Z0-9_À-ỹ])(?:khóe\s+môi|khẽ\s+nhếch|môi)?(?:\s*\.\.\.|\s*,\s*|\s+)?à\s+không(?![a-zA-Z0-9_À-ỹ])/gi, "$1");
     sanitized = sanitized.replace(/(?:lượng\s+)?(?:hormone|hotmone|nội\s+tiết\s+tố)\s*(?:nữ\s+tính|nam\s+tính)?/gi, "dục vọng");
     sanitized = sanitized.replace(/\b(?:hormone|hotmone|nội\s+tiết\s+tố)\b/gi, "dục vọng");
     replaceCase(/xôn\s+xao\s+trong\s+lòng/gi, "xốn xang trong lòng");
@@ -192,18 +192,19 @@ export function filterSensitiveWords(text: string, worldTags: string[] = []): st
 
     // 5. Lọc bỏ các cụm Cup ngực, cỡ ngực, size ngực & chữ cái định cỡ (cỡ D, cup F, size E, 36D...)
     // A. Xóa cả cụm chứa cỡ/size/cup/cúp + chữ cái/số đo (ví dụ: "cỡ Cup D", "cỡ D", "cup D", "cúp D", "size E", "D cup", "E-cup", "cỡ 75B")
-    sanitized = sanitized.replace(/(?:(?<![a-zA-Z0-9_À-ỹ])(?:cỡ|size)\s+)?(?:cup|cúp)\s*[-–—]?\s*[a-gA-G0-9]+/gi, "");
-    sanitized = sanitized.replace(/(?<![a-zA-Z0-9_À-ỹ])[a-gA-G]\s*[-–—]?\s*(?:cup|cúp)(?![a-zA-Z0-9_À-ỹ])/gi, "");
-    sanitized = sanitized.replace(/(?<![a-zA-Z0-9_À-ỹ])(?:cỡ|size)\s+[-–—]?\s*[a-gA-G0-9]+(?![a-zA-Z0-9_À-ỹ])/gi, "");
+    sanitized = sanitized.replace(/(^|[^a-zA-Z0-9_À-ỹ])(?:cỡ|size)\s+(?:cup|cúp)\s*[-–—]?\s*[a-gA-G0-9]+/gi, "$1");
+    sanitized = sanitized.replace(/(cup|cúp)\s*[-–—]?\s*[a-gA-G0-9]+/gi, "");
+    sanitized = sanitized.replace(/(^|[^a-zA-Z0-9_À-ỹ])[a-gA-G]\s*[-–—]?\s*(?:cup|cúp)(?![a-zA-Z0-9_À-ỹ])/gi, "$1");
+    sanitized = sanitized.replace(/(^|[^a-zA-Z0-9_À-ỹ])(?:cỡ|size)\s+[-–—]?\s*[a-gA-G0-9]+(?![a-zA-Z0-9_À-ỹ])/gi, "$1");
 
     // B. Xóa các cụm "cỡ ngực", "cup ngực", "cúp ngực", "size ngực"
-    sanitized = sanitized.replace(/(?<![a-zA-Z0-9_À-ỹ])(?:cỡ|cup|cúp|size)\s+ngực(?![a-zA-Z0-9_À-ỹ])/gi, "");
+    sanitized = sanitized.replace(/(^|[^a-zA-Z0-9_À-ỹ])(?:cỡ|cup|cúp|size)\s+ngực(?![a-zA-Z0-9_À-ỹ])/gi, "$1");
 
     // C. Xóa các từ 'cỡ/size' thừa đứng trước tính từ tả ngực (ví dụ: "cỡ khổng lồ" -> "khổng lồ", "cỡ đầy đặn" -> "đầy đặn")
-    sanitized = sanitized.replace(/(?<![a-zA-Z0-9_À-ỹ])(?:cỡ|size)\s+(?=(?:đầy|căng|khổng|đồ|nhỏ|vừa|nảy|nhô|lớn|to|tròn|mọng)\b)/gi, "");
+    sanitized = sanitized.replace(/(^|[^a-zA-Z0-9_À-ỹ])(?:cỡ|size)\s+(?=(?:đầy|căng|khổng|đồ|nhỏ|vừa|nảy|nhô|lớn|to|tròn|mọng)\b)/gi, "$1");
 
     // D. Xóa từ "cup" hoặc "cúp" đơn lẻ còn sót lại
-    sanitized = sanitized.replace(/(?<![a-zA-Z0-9_À-ỹ])(?:cup|cúp)(?![a-zA-Z0-9_À-ỹ])/gi, "");
+    sanitized = sanitized.replace(/(^|[^a-zA-Z0-9_À-ỹ])(?:cup|cúp)(?![a-zA-Z0-9_À-ỹ])/gi, "$1");
 
     // ==========================================
     // DỌN DẸP KHOẢNG TRẮNG VÀ DẤU CÂU THỪA SAU KHI XÓA TRÊN TỪNG DÒNG
