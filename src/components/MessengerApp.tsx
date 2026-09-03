@@ -436,7 +436,7 @@ export default function MessengerApp({ onClose, theme = 'dark' }: { onClose: () 
     // Chia theo các dấu xuống dòng kép hoặc các ký tự ngắt câu hợp lý để tách bong bóng chat mượt mà
     // Replace lookbehind to support Safari. We split by spaces following a punctuation mark or by newline.
     // Instead of lookbehind, we can just use a normal split and re-attach punctuation, or simply split by newline if it's too complex.
-    // Actually, splitting by /(?<=[.!?])\s+|\n+/ can be simulated by replacing punctuation+space with punctuation+newline, then splitting by newline.
+    // Actually, splitting by /[.!?])\s+|\n+/ can be simulated by replacing punctuation+space with punctuation+newline, then splitting by newline.
     const normalizedText = text.replace(/([.!?])\s+/g, "$1\n");
     const sentences = normalizedText.split(/\n+/).map(s => s.trim()).filter(Boolean);
     if (sentences.length <= 1) return [text];

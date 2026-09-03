@@ -72,7 +72,7 @@ import { getGameplaySystemInstruction } from "../utils/gameplaySystemInstruction
 import { getGameplaySystemInstruction as getCoreRules } from "../utils/gameplaySystemInstruction2";
 import { buildDetailedRecentTurnsMemories, synthesizeTurnStoryMemory } from "../utils/memoryUtils";
 import Markdown from "react-markdown";
-import remarkGfm from "remark-gfm";
+
 import rehypeRaw from "rehype-raw";
 import NPCBuilderModal from "./NPCBuilderModal";
 import {
@@ -4863,7 +4863,7 @@ ${dramaPromptText ? `- GỢI Ý/YÊU CẦU KỊCH TÍNH TỪ NGƯỜI CHƠI (AI 
                                 className={`markdown-body whitespace-pre-wrap leading-loose text-base md:text-lg opacity-95 font-medium ${theme.group === "Dark" ? "" : "text-[#2C1D11]"}`}
                               >
                                 <Markdown
-                                  remarkPlugins={[remarkGfm]}
+                                  
                                   rehypePlugins={[rehypeRaw]}
                                   components={{
                                     del: ({ node, ...props }) => <span className="not-italic" {...props} />,

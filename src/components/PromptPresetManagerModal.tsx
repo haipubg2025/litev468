@@ -4,7 +4,7 @@ import { X, Upload, FileText, Trash2, ChevronDown, ChevronUp } from 'lucide-reac
 import { useStore } from '../store/useStore';
 import { toast } from 'sonner';
 import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
+
 import rehypeRaw from 'rehype-raw';
 
 interface PromptPresetManagerModalProps {
