@@ -1140,7 +1140,8 @@ export const useStore = create<GameState>()(
       phoneAppControl: { messenger: true, discord: true },
       setPhoneAppControl: (controls) =>
         set((state) => {
-          state.phoneAppControl = { ...state.phoneAppControl, ...controls };
+          const currentControl = state.phoneAppControl || { messenger: true, discord: true };
+          state.phoneAppControl = { ...currentControl, ...controls };
           if (state.gameData) {
             state.gameData.phoneAppControl = state.phoneAppControl;
           }

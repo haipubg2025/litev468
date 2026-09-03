@@ -144,7 +144,7 @@ export default function Settings() {
   const resetSettings = useStore(state => state.resetSettings);
   const selectedAIModel = useStore(state => state.selectedAIModel);
   const setSelectedAIModel = useStore(state => state.setSelectedAIModel);
-  const phoneAppControl = useStore(state => state.phoneAppControl);
+  const phoneAppControl = useStore((state) => state.phoneAppControl) || { messenger: true, discord: true };
   const setPhoneAppControl = useStore(state => state.setPhoneAppControl);
   const autoSaveEnabled = useStore(state => state.autoSaveEnabled);
   const setAutoSaveEnabled = useStore(state => state.setAutoSaveEnabled);

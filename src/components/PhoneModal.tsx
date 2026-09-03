@@ -46,7 +46,7 @@ export default function PhoneModal({ isOpen, onClose }: PhoneModalProps) {
   const setPhoneWallpaper = useStore((state) => state.setPhoneWallpaper);
   const phoneTheme = useStore((state) => state.phoneTheme);
   const setPhoneTheme = useStore((state) => state.setPhoneTheme);
-  const phoneAppControl = useStore((state) => state.phoneAppControl);
+  const phoneAppControl = useStore((state) => state.phoneAppControl) || { messenger: true, discord: true };
   const setPhoneAppControl = useStore((state) => state.setPhoneAppControl);
   const unreadMessages = useStore((state) => state.unreadMessages);
   const setUnreadMessages = useStore((state) => state.setUnreadMessages);
