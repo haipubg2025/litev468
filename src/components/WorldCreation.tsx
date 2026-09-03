@@ -186,7 +186,8 @@ export default function WorldCreation() {
     npcTemplateMode = "default",
     disableDefaultNpcRelationships = false,
     customMcFields = [],
-    customNpcFields = []
+    customNpcFields = [],
+    blankSlateMode = true,
   } = worldCreation;
 
   const getImagesForTab = (tab: CreationTab): string[] => {
@@ -283,7 +284,7 @@ export default function WorldCreation() {
       : "";
 
     const imgs = referenceImages;
-    const prompt = `Bạn là một AI chuyên gia sáng tạo kịch bản thế giới (World Building).\n\nDựa trên:\n- Ý tưởng sơ khai: "${initialIdea}"\n- Ý tưởng phát triển: "${developedIdea}"\n\nVà các thông tin thế giới hiện tại (nếu có):\n\`\`\`json\n${JSON.stringify(contextData, null, 2)}\n\`\`\`\n\nNhiệm vụ của bạn: Hãy phân tích các dữ liệu trên để sáng tạo nội dung mới thật hay, độc đáo, chi tiết, logic và liên kết chặt chẽ với các thông tin khác. ĐẶC BIỆT CHÚ Ý: BẠN CHỈ ĐƯỢC PHÉP VIẾT NỘI DUNG CHO DUY NHẤT MỤC: "${fieldName}". Tuyệt đối không được viết lan man, lấn sân sang các mục khác, không được viết thừa thãi những thứ không thuộc về tính chất của mục này.\n\n${currentFieldValue ? `LƯU Ý QUAN TRỌNG: Người chơi đã nhập sẵn nội dung cho mục này như sau: "${currentFieldValue}". Bạn BẮT BUỘC phải xem xét kỹ nội dung cũ trước; TUYỆT ĐỐI không cập nhật theo kiểu cắt ngắn hay rút gọn nội dung cũ; cái gì còn phù hợp thì giữ nguyên, cái gì thay đổi hoặc cần phát triển thêm thì mới sửa lại, nối tiếp hoặc thay thế (nếu nội dung cũ là dạng ý tưởng thì hãy phát triển, triển khai ý tưởng đó thành nội dung hoàn chỉnh), TUYỆT ĐỐI không được làm mất ý chính hay cắt xén dữ liệu ban đầu.\n\n` : ""}${extraInstruction}LƯU Ý TỐI THƯỢNG: TRẢ VỀ TRỰC TIẾP NỘI DUNG (dạng text thuần túy), KHÔNG giải thích luyên thuyên, KHÔNG bọc trong markdown (như \`\`\`json), KHÔNG dùng thẻ <THINKING_PROCESS>.${getImagesNotice(imgs)}`;
+    const prompt = `Bạn là một AI chuyên gia sáng tạo kịch bản thế giới (World Building).\n\nDựa trên:\n- Ý tưởng sơ khai: "${initialIdea}"\n- Ý tưởng phát triển: "${developedIdea}"\n- CHẾ ĐỘ TRANG GIẤY TRẮNG: ${blankSlateMode ? 'BẬT (ON) - Bắt buộc khởi đầu câu chuyện từ lúc MC chưa có gì, từ con số không tròn trĩnh (Level thấp nhất, không có quyền lực/tài sản, là người mới bắt đầu).' : 'TẮT (OFF) - Cho phép MC khởi đầu câu chuyện ở giữa hoặc cuối hành trình (đã có sức mạnh, quyền lực, chức vụ, kinh nghiệm, tài sản... tùy theo logic ý tưởng).'}\n\nVà các thông tin thế giới hiện tại (nếu có):\n\`\`\`json\n${JSON.stringify(contextData, null, 2)}\n\`\`\`\n\nNhiệm vụ của bạn: Hãy phân tích các dữ liệu trên để sáng tạo nội dung mới thật hay, độc đáo, chi tiết, logic và liên kết chặt chẽ với các thông tin khác. ĐẶC BIỆT CHÚ Ý: BẠN CHỈ ĐƯỢC PHÉP VIẾT NỘI DUNG CHO DUY NHẤT MỤC: "${fieldName}". Tuyệt đối không được viết lan man, lấn sân sang các mục khác, không được viết thừa thãi những thứ không thuộc về tính chất của mục này. Đồng thời ĐẢM BẢO TUYỆT ĐỐI tuân thủ Chế Độ Trang Giấy Trắng đang ${blankSlateMode ? 'BẬT' : 'TẮT'}.\n\n${currentFieldValue ? `LƯU Ý QUAN TRỌNG: Người chơi đã nhập sẵn nội dung cho mục này như sau: "${currentFieldValue}". Bạn BẮT BUỘC phải xem xét kỹ nội dung cũ trước; TUYỆT ĐỐI không cập nhật theo kiểu cắt ngắn hay rút gọn nội dung cũ; cái gì còn phù hợp thì giữ nguyên, cái gì thay đổi hoặc cần phát triển thêm thì mới sửa lại, nối tiếp hoặc thay thế (nếu nội dung cũ là dạng ý tưởng thì hãy phát triển, triển khai ý tưởng đó thành nội dung hoàn chỉnh), TUYỆT ĐỐI không được làm mất ý chính hay cắt xén dữ liệu ban đầu.\n\n` : ""}${extraInstruction}LƯU Ý TỐI THƯỢNG: TRẢ VỀ TRỰC TIẾP NỘI DUNG (dạng text thuần túy), KHÔNG giải thích luyên thuyên, KHÔNG bọc trong markdown (như \`\`\`json), KHÔNG dùng thẻ <THINKING_PROCESS>.${getImagesNotice(imgs)}`;
 
     try {
       const result = aiService.generateStreamingContent(
@@ -356,7 +357,7 @@ export default function WorldCreation() {
     const currentFieldValue = (worldData.difficulty && typeof worldData.difficulty === "object") ? (worldData.difficulty as any)[type] : "";
 
     const imgs = referenceImages;
-    const prompt = `Bạn là một AI chuyên gia sáng tạo kịch bản thế giới (World Building).\n\nDựa trên:\n- Ý tưởng sơ khai: "${initialIdea}"\n- Ý tưởng phát triển: "${developedIdea}"\n\nVà các thông tin thế giới hiện tại (nếu có):\n\`\`\`json\n${JSON.stringify(contextData, null, 2)}\n\`\`\`\n\nNhiệm vụ của bạn: Hãy phân tích các dữ liệu trên để sáng tạo nội dung mới thật hay, độc đáo, chi tiết, lý tính cho phần ĐỘ KHÓ dạng: "${type.toUpperCase()}".\n\n${description}\n\n${currentFieldValue ? `LƯU Ý QUAN TRỌNG: Người chơi đã nhập sẵn nội dung cho mục này như sau: "${currentFieldValue}". Bạn BẮT BUỘC phải xem xét kỹ nội dung cũ trước; TUYỆT ĐỐI không cập nhật theo kiểu cắt ngắn hay rút gọn nội dung cũ; cái gì còn phù hợp thì giữ nguyên, cái gì thay đổi hoặc cần phát triển thêm thì mới sửa lại, nối tiếp hoặc thay thế (nếu nội dung cũ là dạng ý tưởng thì hãy phát triển, triển khai ý tưởng đó thành nội dung hoàn chỉnh), TUYỆT ĐỐI không được làm mất ý chính hay cắt xén dữ liệu ban đầu.\n\n` : ""}LƯU Ý TỐI THƯỢNG: TRẢ VỀ TRỰC TIẾP NỘI DUNG (dạng text thuần túy), KHÔNG giải thích luyên thuyên, KHÔNG bọc trong markdown (như \`\`\`json), KHÔNG dùng thẻ <THINKING_PROCESS>.${getImagesNotice(imgs)}`;
+    const prompt = `Bạn là một AI chuyên gia sáng tạo kịch bản thế giới (World Building).\n\nDựa trên:\n- Ý tưởng sơ khai: "${initialIdea}"\n- Ý tưởng phát triển: "${developedIdea}"\n- CHẾ ĐỘ TRANG GIẤY TRẮNG: ${blankSlateMode ? 'BẬT (ON) - Bắt buộc khởi đầu câu chuyện từ lúc MC chưa có gì, từ con số không tròn trĩnh (Level thấp nhất, không có quyền lực/tài sản, là người mới bắt đầu).' : 'TẮT (OFF) - Cho phép MC khởi đầu câu chuyện ở giữa hoặc cuối hành trình (đã có sức mạnh, quyền lực, chức vụ, kinh nghiệm, tài sản... tùy theo logic ý tưởng).'}\n\nVà các thông tin thế giới hiện tại (nếu có):\n\`\`\`json\n${JSON.stringify(contextData, null, 2)}\n\`\`\`\n\nNhiệm vụ của bạn: Hãy phân tích các dữ liệu trên để sáng tạo nội dung mới thật hay, độc đáo, chi tiết, lý tính cho phần ĐỘ KHÓ dạng: "${type.toUpperCase()}".\n\n${description} ĐẢM BẢO TUYỆT ĐỐI tuân thủ Chế Độ Trang Giấy Trắng đang ${blankSlateMode ? 'BẬT' : 'TẮT'}.\n\n${currentFieldValue ? `LƯU Ý QUAN TRỌNG: Người chơi đã nhập sẵn nội dung cho mục này như sau: "${currentFieldValue}". Bạn BẮT BUỘC phải xem xét kỹ nội dung cũ trước; TUYỆT ĐỐI không cập nhật theo kiểu cắt ngắn hay rút gọn nội dung cũ; cái gì còn phù hợp thì giữ nguyên, cái gì thay đổi hoặc cần phát triển thêm thì mới sửa lại, nối tiếp hoặc thay thế (nếu nội dung cũ là dạng ý tưởng thì hãy phát triển, triển khai ý tưởng đó thành nội dung hoàn chỉnh), TUYỆT ĐỐI không được làm mất ý chính hay cắt xén dữ liệu ban đầu.\n\n` : ""}LƯU Ý TỐI THƯỢNG: TRẢ VỀ TRỰC TIẾP NỘI DUNG (dạng text thuần túy), KHÔNG giải thích luyên thuyên, KHÔNG bọc trong markdown (như \`\`\`json), KHÔNG dùng thẻ <THINKING_PROCESS>.${getImagesNotice(imgs)}`;
 
     try {
       const result = aiService.generateStreamingContent(
@@ -878,6 +879,7 @@ CHỈ TRẢ VỀ JSON THUẦN TÚY, TUYỆT ĐỐI KHÔNG BỌC TRONG MARKDOWN.`
       const prompt = `Ý tưởng người chơi cung cấp:
 - Ý tưởng sơ khai: "${initialIdea}"
 - Ý tưởng đã phát triển: "${developedIdea}"
+- CHẾ ĐỘ TRANG GIẤY TRẮNG: ${blankSlateMode ? 'BẬT (ON) - Bắt buộc khởi đầu câu chuyện từ lúc MC chưa có gì, từ con số không tròn trĩnh (Level thấp nhất, không có quyền lực/tài sản, là người mới bắt đầu).' : 'TẮT (OFF) - Cho phép MC khởi đầu câu chuyện ở giữa hoặc cuối hành trình (đã có sức mạnh, quyền lực, chức vụ, kinh nghiệm, tài sản... tùy theo logic ý tưởng).'}
 
 Dưới đây là các thông tin hiện tại trong các ô nhập liệu (nếu có nội dung, BẮT BUỘC phải đọc và phát triển, làm giàu, chi tiết hóa thêm nội dung cũ, tuyệt đối không được làm mất ý chính ban đầu. Nếu nội dung có dạng ý tưởng, hãy triển khai thành nội dung hoàn chỉnh. Nếu trống, hãy tự do sáng tạo):
 \`\`\`json
@@ -1272,6 +1274,7 @@ Hãy trình bày một cách cuốn hút và logic. BẮT BUỘC TRẢ LỜI VÀ
       const prompt = `Ý tưởng người chơi cung cấp:
 - Ý tưởng sơ khai chung của thế giới: "${initialIdea}"
 - Ý tưởng đã phát triển: "${developedIdea}"
+- CHẾ ĐỘ TRANG GIẤY TRẮNG: ${blankSlateMode ? 'BẬT (ON) - Bắt buộc khởi đầu câu chuyện từ lúc MC chưa có gì, từ con số không tròn trĩnh (Level thấp nhất, không có quyền lực/tài sản, là người mới bắt đầu).' : 'TẮT (OFF) - Cho phép MC khởi đầu câu chuyện ở giữa hoặc cuối hành trình (đã có sức mạnh, quyền lực, chức vụ, kinh nghiệm, tài sản... tùy theo logic ý tưởng).'}
 - Ý tưởng dành riêng cho việc tạo MC: "${mcIdea}"
 
 Dưới đây là các thông tin hiện tại trong các ô nhập liệu (nếu có nội dung, BẮT BUỘC phải đọc và phát triển, làm giàu, chi tiết hóa thêm nội dung cũ, tuyệt đối không được làm mất ý chính ban đầu. Nếu nội dung có dạng ý tưởng, hãy triển khai thành nội dung hoàn chỉnh. Nếu trống, hãy tự do sáng tạo). Hãy phân tích kỹ BỐI CẢNH THẾ GIỚI (worldData, worldDetails) và CÁC NHÂN VẬT ĐÃ CÓ (mcData, mcsData, npcs) để tạo ra nhân vật sao cho thật ăn khớp:
@@ -1436,6 +1439,7 @@ LƯU Ý QUAN TRỌNG: Hãy sáng tạo thật chi tiết dựa trên ý tưởng
       const prompt = `Ý tưởng người chơi cung cấp:
 - Ý tưởng sơ khai chung của thế giới: "${initialIdea}"
 - Ý tưởng đã phát triển: "${developedIdea}"
+- CHẾ ĐỘ TRANG GIẤY TRẮNG: ${blankSlateMode ? 'BẬT (ON) - Bắt buộc khởi đầu câu chuyện từ lúc MC chưa có gì, từ con số không tròn trĩnh (Level thấp nhất, không có quyền lực/tài sản, là người mới bắt đầu).' : 'TẮT (OFF) - Cho phép MC khởi đầu câu chuyện ở giữa hoặc cuối hành trình (đã có sức mạnh, quyền lực, chức vụ, kinh nghiệm, tài sản... tùy theo logic ý tưởng).'}
 - Ý tưởng dành riêng cho việc tạo NPCs: "${npcIdea}"
 
 Dưới đây là các thông tin hiện tại trong các ô nhập liệu (nếu có nội dung, BẮT BUỘC phải đọc và phát triển, làm giàu, chi tiết hóa thêm nội dung cũ, tuyệt đối không được làm mất ý chính ban đầu. Nếu nội dung có dạng ý tưởng, hãy triển khai thành nội dung hoàn chỉnh. Nếu trống, hãy tự do sáng tạo). Hãy phân tích kỹ BỐI CẢNH THẾ GIỚI (worldData, worldDetails) và CÁC NHÂN VẬT ĐÃ CÓ (mcData, mcsData, npcs) để tạo ra nhân vật sao cho thật ăn khớp:
@@ -1615,6 +1619,7 @@ LƯU Ý:
       const prompt = `Ý tưởng người chơi cung cấp:
 - Ý tưởng sơ khai chung của thế giới: "${initialIdea}"
 - Ý tưởng đã phát triển: "${developedIdea}"
+- CHẾ ĐỘ TRANG GIẤY TRẮNG: ${blankSlateMode ? 'BẬT (ON) - Bắt buộc khởi đầu câu chuyện từ lúc MC chưa có gì, từ con số không tròn trĩnh (Level thấp nhất, không có quyền lực/tài sản, là người mới bắt đầu).' : 'TẮT (OFF) - Cho phép MC khởi đầu câu chuyện ở giữa hoặc cuối hành trình (đã có sức mạnh, quyền lực, chức vụ, kinh nghiệm, tài sản... tùy theo logic ý tưởng).'}
 - Ý tưởng dành riêng cho việc tạo Location: "${locationIdea}"
 
 Dưới đây là các thông tin hiện tại trong các ô nhập liệu (nếu có nội dung, BẮT BUỘC phải đọc và phát triển, làm giàu, chi tiết hóa thêm nội dung cũ, tuyệt đối không được làm mất ý chính ban đầu. Nếu nội dung có dạng ý tưởng, hãy triển khai thành nội dung hoàn chỉnh. Nếu trống, hãy tự do sáng tạo). Hãy phân tích kỹ BỐI CẢNH THẾ GIỚI (worldData, worldDetails) để tạo ra các địa điểm sao cho thật ăn khớp. KHÔNG ĐƯỢC MANG NHÂN VẬT VÀO MÔ TẢ ĐỊA ĐIỂM:
@@ -1733,6 +1738,7 @@ LƯU Ý QUAN TRỌNG: Hãy tạo ra ĐỦ số lượng Location như được y
       messengerReadChatIds: {},
       mcTemplateMode: worldCreation.mcTemplateMode,
       npcTemplateMode: worldCreation.npcTemplateMode,
+      blankSlateMode: worldCreation.blankSlateMode ?? true,
       disableDefaultNpcRelationships: worldCreation.disableDefaultNpcRelationships || false,
       customMcFields: worldCreation.customMcFields,
       customNpcFields: worldCreation.customNpcFields,
@@ -2108,11 +2114,20 @@ LƯU Ý QUAN TRỌNG: Hãy tạo ra ĐỦ số lượng Location như được y
                                 <ChevronUp className="w-4 h-4 opacity-70" />
                               )}
                             </button>
-                            <motion.button
-                              whileHover={{ scale: 1.05 }}
-                              whileTap={{ scale: 0.95 }}
-                              onClick={handleAIGenerate}
-                              disabled={isGenerating}
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => updateWorldCreation({ blankSlateMode: !blankSlateMode })}
+                                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer border ${blankSlateMode ? 'bg-blue-500/20 text-blue-400 border-blue-500/30 hover:bg-blue-500/30' : 'bg-slate-500/20 text-slate-400 border-slate-500/30 hover:bg-slate-500/30'}`}
+                                title={blankSlateMode ? "Bật: MC xuất phát từ con số 0." : "Tắt: MC có thể đã đạt thành tựu gì đó."}
+                              >
+                                <span>Trang giấy trắng:</span>
+                                <span>{blankSlateMode ? 'ON' : 'OFF'}</span>
+                              </button>
+                              <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={handleAIGenerate}
+                                disabled={isGenerating}
                               className="flex items-center gap-2 px-4 py-2 rounded-xl bg-purple-600/20 border border-purple-500/30 text-purple-400 text-sm font-bold hover:bg-purple-600/30 transition-all cursor-pointer disabled:opacity-50 relative overflow-hidden group"
                             >
                               {isGenerating ? (
@@ -2136,6 +2151,7 @@ LƯU Ý QUAN TRỌNG: Hãy tạo ra ĐỦ số lượng Location như được y
                                 />
                               )}
                             </motion.button>
+                            </div>
                           </div>
                           <AnimatePresence>
                             {!isInitialIdeaCollapsed && (

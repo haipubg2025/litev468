@@ -72,6 +72,7 @@ interface GameState {
   setSelectedAIModel: (model: string) => void;
   // World Creation State
   worldCreation: {
+    blankSlateMode?: boolean;
     playerRules?: string;
     initialIdea: string;
     developedIdea: string;
@@ -346,6 +347,7 @@ interface GameState {
 }
 
 const INITIAL_WORLD_CREATION = {
+  blankSlateMode: true,
   playerRules: "",
   initialIdea: "",
   developedIdea: "",

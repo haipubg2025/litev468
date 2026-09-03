@@ -23,7 +23,8 @@ export function getGameplaySystemInstruction(
   customMcFields: any[] = [],
   npcTemplateMode: "default" | "custom" = "default",
   customNpcFields: any[] = [],
-  disableDefaultNpcRelationships: boolean = false
+  disableDefaultNpcRelationships: boolean = false,
+  blankSlateMode: boolean = true
 ): string {
   const isDarkTheme = themeGroup === "Dark";
   const getColor = (key: string) => colorConfig[key] || (isDarkTheme ? (DEFAULT_COLOR_CONFIG as Record<string, string>)[key] : (DEFAULT_LIGHT_COLOR_CONFIG as Record<string, string>)[key]) || "";
@@ -2245,7 +2246,9 @@ ${playerRules}
     ]
   },`;
 
-  return `${dramaInstruction}${hardModeInstruction}${anniePersona}
+  const globalRules = `[QUY TẮC TOÀN CỤC VỀ DỊCH TỪ "USER"]: TRONG BẤT KỲ YÊU CẦU NÀO, NẾU THẤY TỪ "User" HOẶC "Người chơi" TRONG LỜI VĂN HAY Ý TƯỞNG, BẠN BẮT BUỘC TỰ ĐỘNG HIỂU VÀ DỊCH NÓ THÀNH "Nhân vật chính" (MC). "User" TUYỆT ĐỐI KHÔNG BAO GIỜ LÀ MỘT CÁI TÊN RIÊNG.\n\n${isFirstTurn && blankSlateMode ? `[QUY TẮC TRANG GIẤY TRẮNG - BLANK SLATE MODE (BẬT)]: ĐÂY LÀ LƯỢT 0000 VÀ CHẾ ĐỘ TRANG GIẤY TRẮNG ĐANG ĐƯỢC BẬT. BẠN BẮT BUỘC PHẢI KHỞI TẠO CÂU CHUYỆN TỪ LÚC MC CHƯA CÓ GÌ, TỪ CON SỐ KHÔNG TRÒN TRĨNH (Ví dụ: Cấp độ thấp nhất, không có quyền lực, không có tài sản, là người mới bắt đầu hoàn toàn). Mọi sức mạnh, kinh nghiệm hay thành tựu lớn đều phải để MC tự đạt được trong quá trình chơi sau này, TUYỆT ĐỐI KHÔNG cấp sẵn cho MC ngay từ đầu.\n\n` : ''}`;
+
+  return `${globalRules}${dramaInstruction}${hardModeInstruction}${anniePersona}
 ${rulesBlock}
 
 [QUY TẮC KỶ LUẬT THÉP & TUÂN THỦ CẤU TRÚC VỚI HỘI ĐỒNG AI]:

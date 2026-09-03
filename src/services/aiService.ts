@@ -204,6 +204,12 @@ class AIService {
   }
 
   public async *generateStreamingContent(prompt: string, schema?: any, systemInstruction?: string, imagesBase64?: string[]) {
+    const globalRule = `[QUY TẮC TOÀN CỤC VỀ DỊCH TỪ "USER"]: TRONG BẤT KỲ YÊU CẦU NÀO, NẾU THẤY TỪ "User" HOẶC "Người chơi" TRONG LỜI VĂN HAY Ý TƯỞNG, BẠN BẮT BUỘC TỰ ĐỘNG HIỂU VÀ DỊCH NÓ THÀNH "Nhân vật chính" (MC). "User" TUYỆT ĐỐI KHÔNG BAO GIỜ LÀ MỘT CÁI TÊN RIÊNG.\n\n`;
+    let effectiveSystemInstruction = systemInstruction || "";
+    if (!effectiveSystemInstruction.includes("QUY TẮC TOÀN CỤC VỀ DỊCH TỪ \"USER\"")) {
+      effectiveSystemInstruction = globalRule + effectiveSystemInstruction;
+    }
+
     const state = useStore.getState();
     let attempt = 0;
     const maxAttempts = Math.max(3, state.personalApiKeys.length + 2); // Cho phép thử lại ít nhất 3 lần để cứu nguy
@@ -224,7 +230,7 @@ class AIService {
       let accumulatedThought = "";
 
       try {
-        const rawStream = this.generateStreamingContentRaw(prompt, schema, systemInstruction, providedApiKey, imagesBase64);
+        const rawStream = this.generateStreamingContentRaw(prompt, schema, effectiveSystemInstruction, providedApiKey, imagesBase64);
         const telemetryStream = this.withTelemetry(rawStream, isUsingProxy, activeProxy, providedApiKey, model);
         
         for await (const chunk of telemetryStream) {

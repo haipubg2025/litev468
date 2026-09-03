@@ -549,7 +549,7 @@ TUYỆT ĐỐI KHÔNG tự ý liệt kê số đo chèn vào phần chính văn 
      + CẤM LẬP QUAN HỆ TRƯỚC HẠN & CẤM SPOIL THEO KIỂU "CHƯA GẶP": NẾU MC vừa Isekai/xuyên không/chuyển sinh tới dị giới, NGƯỜI Ở ĐÓ HOÀN TOÀN KHÔNG BIẾT MC. Tuyệt đối CẤM tạo cấu trúc quan hệ thân thiết, tình yêu, ân oán. LƯU Ý ĐẶC BIỆT: NẾU HỌ KHÔNG QUEN NHAU, BẮT BUỘC ĐỂ MẢNG \`relationships\` TRỐNG ([]). TUYỆT ĐỐI KHÔNG ĐƯỢC ĐIỀN "Người lạ", "Chưa gặp mặt" hay "Chưa quen biết", vì việc ghi ra như vậy là hành vi spoil (dự báo họ sẽ gặp) rất phô và vô lý. Chỉ tạo quan hệ nếu họ ĐÃ quen nhau từ trước (như trong cùng 1 gia đình/tổ chức ở quá khứ).
      + Quyền tạo ra tương lai thuộc về lựa chọn của người chơi ở Gameplay. AI thiết lập dữ liệu ban đầu PHẢI ĐỂ TRỐNG TOÀN BỘ tương lai, không được rào sẵn kịch bản lên tính cách/quan hệ của NPC!`;
 
-  return `[LUẬT TỐI THƯỢNG TỪ NGƯỜI CHƠI (ƯU TIÊN TUYỆT ĐỐI, CAO HƠN TẤT CẢ MỌI MÃ NGUỒN KHÁC TRONG GAME)]
+  return `[QUY TẮC TOÀN CỤC VỀ DỊCH TỪ "USER"]: TRONG BẤT KỲ YÊU CẦU NÀO, NẾU THẤY TỪ "User" HOẶC "Người chơi" TRONG LỜI VĂN HAY Ý TƯỞNG, BẠN BẮT BUỘC TỰ ĐỘNG HIỂU VÀ DỊCH NÓ THÀNH "Nhân vật chính" (MC). "User" TUYỆT ĐỐI KHÔNG BAO GIỜ LÀ MỘT CÁI TÊN RIÊNG.\n\n[LUẬT TỐI THƯỢNG TỪ NGƯỜI CHƠI (ƯU TIÊN TUYỆT ĐỐI, CAO HƠN TẤT CẢ MỌI MÃ NGUỒN KHÁC TRONG GAME)]
 1. TÔN TRỌNG THIẾT LẬP GỐC: Mọi thiết lập thế giới đều là mong muốn của người chơi, vì thế AI phải tôn trọng và tuân theo tuyệt đối, không tự ý sáng tạo thêm nếu người chơi không yêu cầu như vậy.
 2. CHỐNG DÂM HÓA, TÌNH DỤC HÓA: Trong game này, AI TUYỆT ĐỐI KHÔNG dâm hóa các nhân vật, KHÔNG tình dục hóa hay nô lệ hóa. KHÔNG mô tả về dục vọng hay khao khát quá nhiều.
 3. CHỐNG TIÊU CỰC THÁI QUÁ: KHÔNG sa đà vào những miêu tả quá gay gắt hay quá tiêu cực.
@@ -984,7 +984,7 @@ Trách nhiệm của bạn: Biến "1 ý tưởng nhỏ khuyết thiếu" thành
 [ĐIỀU KHOẢN TƯƠNG THÍCH THỂ LOẠI & BỐI CẢNH TỐI CAO - BẮT BUỘC]:
 Toàn bộ Hội đồng AI bắt buộc phải điều uốn, đồng nhất và hòa hợp kịch bản phát triển ý tưởng, hệ thuật ngữ ngôn từ mô tả và các tài năng, năng khiếu của nhân vật tương thích tuyệt đối 100% với thể loại và bối cảnh được lựa chọn, tuyệt đối không dùng sai ngữ cảnh hoặc sử dụng thuật ngữ lạc quẻ làm giảm sút chất lượng kịch bản.`;
 
-  return `${anniePersona}
+  return `[QUY TẮC TOÀN CỤC VỀ DỊCH TỪ "USER"]: TRONG BẤT KỲ YÊU CẦU NÀO, NẾU THẤY TỪ "User" HOẶC "Người chơi" TRONG LỜI VĂN HAY Ý TƯỞNG, BẠN BẮT BUỘC TỰ ĐỘNG HIỂU VÀ DỊCH NÓ THÀNH "Nhân vật chính" (MC). "User" TUYỆT ĐỐI KHÔNG BAO GIỜ LÀ MỘT CÁI TÊN RIÊNG.\n\n${anniePersona}
 
 [NHIỆM VỤ CỦA BẠN VÀ HỘI ĐỒNG]:
 1. Người chơi sẽ đưa cho bạn một "Ý tưởng sơ khai".
@@ -1051,7 +1051,7 @@ Hãy để gen di truyền ảo làm việc của nó, thả lỏng sự sáng t
 
 
 export function getAIGenFieldSystemInstruction(): string {
-  return `Bạn là một AI chuyên gia sáng tạo kịch bản thế giới (World Building). Hãy tập trung và chỉ trả về đúng nội dung yêu cầu, tuyệt đối không tạo thẻ nội suy <THINKING_PROCESS> hay bất kỳ râu ria nào khác. 
+  return `[QUY TẮC TOÀN CỤC VỀ DỊCH TỪ "USER"]: TRONG BẤT KỲ YÊU CẦU NÀO, NẾU THẤY TỪ "User" HOẶC "Người chơi" TRONG LỜI VĂN HAY Ý TƯỞNG, BẠN BẮT BUỘC TỰ ĐỘNG HIỂU VÀ DỊCH NÓ THÀNH "Nhân vật chính" (MC). "User" TUYỆT ĐỐI KHÔNG BAO GIỜ LÀ MỘT CÁI TÊN RIÊNG.\n\nBạn là một AI chuyên gia sáng tạo kịch bản thế giới (World Building). Hãy tập trung và chỉ trả về đúng nội dung yêu cầu, tuyệt đối không tạo thẻ nội suy <THINKING_PROCESS> hay bất kỳ râu ria nào khác. 
 
 [QUY TẮC BẮT BUỘC VỀ DẤU CÂU]:
 1. CẤM TUYỆT ĐỐI DÙNG DẤU NHÁY KÉP (") HOẶC ESCAPE (\") BÊN TRONG GIÁ TRỊ CHUỖI VĂN BẢN/JSON:

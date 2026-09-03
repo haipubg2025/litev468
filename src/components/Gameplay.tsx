@@ -3200,7 +3200,7 @@ ${historyText}
 
 BẠN ĐANG XỬ LÝ LƯỢT CHƠI THỨ: ${turns.length}
 
-Hành động tiếp theo của người chơi: ${effectiveUserAction}`;
+Hành động tiếp theo của Nhân vật chính (MC): ${effectiveUserAction}`;
     }
 
     // Thêm nhật ký Messenger chat từ điện thoại vào bối cảnh
@@ -3291,7 +3291,8 @@ ${dramaPromptText ? `- GỢI Ý/YÊU CẦU KỊCH TÍNH TỪ NGƯỜI CHƠI (AI 
       customMcFields,
       npcTemplateMode,
       customNpcFields,
-      gameData?.disableDefaultNpcRelationships || false
+      gameData?.disableDefaultNpcRelationships || false,
+      gameData?.blankSlateMode ?? true
     );
     
     // Append core rules
