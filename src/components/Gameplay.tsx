@@ -2315,7 +2315,7 @@ export default function Gameplay() {
             const locObj = msg.npcLocations.find(
               (loc: any) =>
                 loc && npc &&
-                ((loc.id && npc.id && loc.id.toLowerCase().trim() === String(npc.id).toLowerCase().trim()) || (loc.id && npc.name && loc.id.toLowerCase().trim() === String(npc.name).toLowerCase().trim()) || (loc.id && npc.fullName && loc.id.toLowerCase().trim() === String(npc.fullName).toLowerCase().trim()) || (loc.name && npc.id && loc.name.toLowerCase().trim() === String(npc.id).toLowerCase().trim()) || (loc.name && npc.name && loc.name.toLowerCase().trim() === String(npc.name).toLowerCase().trim()) || (loc.name && npc.fullName && loc.name.toLowerCase().trim() === String(npc.fullName).toLowerCase().trim())),
+                ((loc.id && npc.id && String(loc.id).toLowerCase().trim() === String(npc.id).toLowerCase().trim()) || (loc.id && npc.name && String(loc.id).toLowerCase().trim() === String(npc.name).toLowerCase().trim()) || (loc.id && npc.fullName && String(loc.id).toLowerCase().trim() === String(npc.fullName).toLowerCase().trim()) || (loc.name && npc.id && String(loc.name).toLowerCase().trim() === String(npc.id).toLowerCase().trim()) || (loc.name && npc.name && String(loc.name).toLowerCase().trim() === String(npc.name).toLowerCase().trim()) || (loc.name && npc.fullName && String(loc.name).toLowerCase().trim() === String(npc.fullName).toLowerCase().trim())),
             );
             if (locObj) {
               const cleanOldLoc = (locObj.location || "")
@@ -2356,7 +2356,7 @@ export default function Gameplay() {
         const currentNpcLoc = Array.isArray(latestAiMsg?.npcLocations) ? latestAiMsg.npcLocations.find(
           (loc: any) =>
             loc && npc &&
-            ((loc.id && npc.id && loc.id.toLowerCase().trim() === String(npc.id).toLowerCase().trim()) || (loc.id && npc.name && loc.id.toLowerCase().trim() === String(npc.name).toLowerCase().trim()) || (loc.id && npc.fullName && loc.id.toLowerCase().trim() === String(npc.fullName).toLowerCase().trim()) || (loc.name && npc.id && loc.name.toLowerCase().trim() === String(npc.id).toLowerCase().trim()) || (loc.name && npc.name && loc.name.toLowerCase().trim() === String(npc.name).toLowerCase().trim()) || (loc.name && npc.fullName && loc.name.toLowerCase().trim() === String(npc.fullName).toLowerCase().trim())),
+            ((loc.id && npc.id && String(loc.id).toLowerCase().trim() === String(npc.id).toLowerCase().trim()) || (loc.id && npc.name && String(loc.id).toLowerCase().trim() === String(npc.name).toLowerCase().trim()) || (loc.id && npc.fullName && String(loc.id).toLowerCase().trim() === String(npc.fullName).toLowerCase().trim()) || (loc.name && npc.id && String(loc.name).toLowerCase().trim() === String(npc.id).toLowerCase().trim()) || (loc.name && npc.name && String(loc.name).toLowerCase().trim() === String(npc.name).toLowerCase().trim()) || (loc.name && npc.fullName && String(loc.name).toLowerCase().trim() === String(npc.fullName).toLowerCase().trim())),
         )?.location : undefined;
 
         const isCurrentUnknown =
@@ -3233,7 +3233,7 @@ Hành động tiếp theo của người chơi: ${effectiveUserAction}`;
               if (msgs.length > 0) {
                  discordChatsStr += `- Kênh ${channel}:\n`;
                  msgs.slice(-10).forEach((msg: any) => {
-                    discordChatsStr += `  + [${new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}] ${msg.sender}: "${msg.text}"\n`;
+                    discordChatsStr += `  + [${new Date(msg.timestamp).toLocaleTimeString(undefined, {hour: '2-digit', minute:'2-digit'})}] ${msg.sender}: "${msg.text}"\n`;
                  });
               }
            });
@@ -3243,7 +3243,7 @@ Hành động tiếp theo của người chơi: ${effectiveUserAction}`;
               if (msgs.length > 0) {
                  discordChatsStr += `- Tin nhắn riêng (DM) với ${userId}:\n`;
                  msgs.slice(-10).forEach((msg: any) => {
-                    discordChatsStr += `  + [${new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}] ${msg.sender}: "${msg.text}"\n`;
+                    discordChatsStr += `  + [${new Date(msg.timestamp).toLocaleTimeString(undefined, {hour: '2-digit', minute:'2-digit'})}] ${msg.sender}: "${msg.text}"\n`;
                  });
               }
            });
@@ -3554,9 +3554,15 @@ ${dramaPromptText ? `- GỢI Ý/YÊU CẦU KỊCH TÍNH TỪ NGƯỜI CHƠI (AI 
               // Nếu chat cá nhân, cố gắng ánh xạ thông minh về ID gốc của NPC để chống rác nhân bản
               if (!isGroup) {
                 const matchedNpc = worldNpcs.find((n: any) => {
-                  const idMatch = n.id && (n.id.toLowerCase() === targetChatId.toLowerCase());
-                  const nameMatch = n.name && (n.name.toLowerCase() === targetChatId.toLowerCase() || n.name.toLowerCase() === updateChat.chatName?.toLowerCase());
-                  const fullNameMatch = n.fullName && (n.fullName.toLowerCase() === updateChat.chatName?.toLowerCase() || n.fullName.toLowerCase() === targetChatId.toLowerCase());
+                  const targetChatIdStr = String(targetChatId || "").toLowerCase();
+                  const chatNameStr = String(updateChat.chatName || "").toLowerCase();
+                  const nIdStr = String(n.id || "").toLowerCase();
+                  const nNameStr = String(n.name || "").toLowerCase();
+                  const nFullNameStr = String(n.fullName || "").toLowerCase();
+                  
+                  const idMatch = n.id && (nIdStr === targetChatIdStr);
+                  const nameMatch = n.name && (nNameStr === targetChatIdStr || nNameStr === chatNameStr);
+                  const fullNameMatch = n.fullName && (nFullNameStr === chatNameStr || nFullNameStr === targetChatIdStr);
                   return idMatch || nameMatch || fullNameMatch;
                 });
                 
@@ -3566,15 +3572,15 @@ ${dramaPromptText ? `- GỢI Ý/YÊU CẦU KỊCH TÍNH TỪ NGƯỜI CHƠI (AI 
                 }
               }
               
-              let existingChat = newData.phone.chats.find((c: any) => c.chatId.toLowerCase() === targetChatId.toLowerCase());
+              let existingChat = newData.phone.chats.find((c: any) => String(c.chatId).toLowerCase() === String(targetChatId).toLowerCase());
               
               // Dự phòng: So khớp thêm bằng chatName nếu vẫn không tìm thấy
               if (!existingChat && !isGroup) {
                 existingChat = newData.phone.chats.find((c: any) => 
                   !c.isGroup && 
-                  (c.chatName?.toLowerCase() === updateChat.chatName?.toLowerCase() || 
-                   c.chatId?.toLowerCase() === updateChat.chatName?.toLowerCase() || 
-                   c.chatName?.toLowerCase() === targetChatId.toLowerCase())
+                  (String(c.chatName || "").toLowerCase() === String(updateChat.chatName || "").toLowerCase() || 
+                   String(c.chatId || "").toLowerCase() === String(updateChat.chatName || "").toLowerCase() || 
+                   String(c.chatName || "").toLowerCase() === String(targetChatId || "").toLowerCase())
                 );
                 if (existingChat) {
                   targetChatId = existingChat.chatId;
@@ -3585,7 +3591,7 @@ ${dramaPromptText ? `- GỢI Ý/YÊU CẦU KỊCH TÍNH TỪ NGƯỜI CHƠI (AI 
               if (!existingChat && isGroup) {
                 existingChat = newData.phone.chats.find((c: any) => 
                   c.isGroup && 
-                  c.chatName?.toLowerCase() === updateChat.chatName?.toLowerCase()
+                  String(c.chatName || "").toLowerCase() === String(updateChat.chatName || "").toLowerCase()
                 );
                 if (existingChat) {
                   targetChatId = existingChat.chatId;
@@ -3615,7 +3621,7 @@ ${dramaPromptText ? `- GỢI Ý/YÊU CẦU KỊCH TÍNH TỪ NGƯỜI CHƠI (AI 
                   : [];
                   
                 // Tìm NPC tương ứng để lấy tên chuẩn làm mặc định nếu AI không gửi tên
-                const npcDefault = worldNpcs.find((n: any) => (n.id || n.name).toLowerCase() === targetChatId.toLowerCase());
+                const npcDefault = worldNpcs.find((n: any) => String(n.id || n.name || "").toLowerCase() === String(targetChatId || "").toLowerCase());
                 const defaultName = npcDefault ? npcDefault.name : targetChatId;
                 
                 newData.phone.chats.push({
@@ -3704,7 +3710,7 @@ ${dramaPromptText ? `- GỢI Ý/YÊU CẦU KỊCH TÍNH TỪ NGƯỜI CHƠI (AI 
             parsedData.npcLocations.forEach((npcLoc: any) => {
               if (npcLoc && npcLoc.id && typeof npcLoc.location === "string") {
                 const npcIndex = newData.npcs.findIndex(
-                  (n: any) => n && ((n.id && npcLoc.id && n.id.toLowerCase().trim() === npcLoc.id.toLowerCase().trim()) || (n.name && npcLoc.id && n.name.toLowerCase().trim() === npcLoc.id.toLowerCase().trim()) || (n.fullName && npcLoc.id && n.fullName.toLowerCase().trim() === npcLoc.id.toLowerCase().trim()) || (n.name && npcLoc.name && n.name.toLowerCase().trim() === npcLoc.name.toLowerCase().trim()) || (n.fullName && npcLoc.name && n.fullName.toLowerCase().trim() === npcLoc.name.toLowerCase().trim()))
+                  (n: any) => n && ((n.id && npcLoc.id && String(n.id).toLowerCase().trim() === String(npcLoc.id).toLowerCase().trim()) || (n.name && npcLoc.id && String(n.name).toLowerCase().trim() === String(npcLoc.id).toLowerCase().trim()) || (n.fullName && npcLoc.id && String(n.fullName).toLowerCase().trim() === String(npcLoc.id).toLowerCase().trim()) || (n.name && npcLoc.name && String(n.name).toLowerCase().trim() === String(npcLoc.name).toLowerCase().trim()) || (n.fullName && npcLoc.name && String(n.fullName).toLowerCase().trim() === String(npcLoc.name).toLowerCase().trim()))
                 );
                 if (npcIndex !== -1 && newData.npcs[npcIndex].location !== npcLoc.location) {
                   newData.npcs[npcIndex].location = npcLoc.location;

@@ -85,7 +85,7 @@ export default function PhoneModal({ isOpen, onClose }: PhoneModalProps) {
 
   const renderTopBar = (isDarkBg = false) => (
     <div className={`flex justify-between items-center px-4 py-2 text-xs font-medium z-50 relative ${isDarkBg ? 'text-white' : 'text-current'}`}>
-      <span>{time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}</span>
+      <span>{time.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', hour12: false })}</span>
       <div className="flex items-center gap-1.5">
         <Signal size={12} />
         <Wifi size={12} />
@@ -103,7 +103,7 @@ export default function PhoneModal({ isOpen, onClose }: PhoneModalProps) {
       {renderTopBar(true)}
       <div className="px-4 pt-8 pb-4 flex flex-col items-center relative z-10 pointer-events-none">
         <div className="text-5xl font-light mb-1">
-          {time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}
+          {time.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', hour12: false })}
         </div>
         <div className="text-sm font-medium text-white/80">
           {time.toLocaleDateString('vi-VN', { weekday: 'long', day: 'numeric', month: 'long' })}

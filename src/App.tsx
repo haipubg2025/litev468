@@ -7,6 +7,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { MemoryRouter as Router, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import ErrorBoundary from "./components/ErrorBoundary";
 import Sidebar from './components/Sidebar';
 import Gallery from './components/Gallery';
 import Settings from './components/Settings';
@@ -205,7 +206,7 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <Router>
-        <InnerApp />
+        <ErrorBoundary><InnerApp /></ErrorBoundary>
       </Router>
     </QueryClientProvider>
   );

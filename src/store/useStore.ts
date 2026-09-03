@@ -1404,7 +1404,7 @@ export const useStore = create<GameState>()(
           const s = draft.saves.find((x) => x.id === id);
           if (s) {
             draft.gameData = sanitizeGameData(s.gameData);
-            draft.messages = s.messages;
+            draft.messages = s.messages || [];
             draft.messengerReadChatIds = s.gameData?.messengerReadChatIds || {};
             draft.phoneAppControl = s.gameData?.phoneAppControl || draft.phoneAppControl || { messenger: true, discord: true };
             draft.unreadMessages = s.gameData?.unreadMessages || 0;

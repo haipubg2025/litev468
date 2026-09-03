@@ -827,7 +827,7 @@ Hãy nhắn tin trả lời tin nhắn mới nhất của ${mcName}. Bạn chỉ
                 )}
                 
                 <span className="text-xs text-zinc-500 mr-1.5 align-middle">
-                  {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  {new Date(msg.timestamp).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
                 </span>
                 
                 <span 

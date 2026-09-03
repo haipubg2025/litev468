@@ -926,7 +926,7 @@ Hãy tạo câu trả lời của các NPC dưới dạng mảng JSON!`;
                   chat.messages.push({
                     sender: reply.sender,
                     content: reply.content,
-                    timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                    timestamp: new Date().toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }),
                     isPendingStream: true
                   });
                 }
@@ -1030,7 +1030,7 @@ Hãy nhắn tin trả lời tin nhắn mới nhất của ${mcName}. Bạn chỉ
           const newMsgs = responseParts.map((part) => ({
             sender: npcName,
             content: part,
-            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            timestamp: new Date().toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }),
             isPendingStream: true
           }));
 
@@ -1072,7 +1072,7 @@ Hãy nhắn tin trả lời tin nhắn mới nhất của ${mcName}. Bạn chỉ
       const newMsg = {
         sender: mcData?.name || "Player",
         content: msgText,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        timestamp: new Date().toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }),
         replyTo: replyData
       };
 
@@ -1524,7 +1524,7 @@ Hãy nhắn tin trả lời tin nhắn mới nhất của ${mcName}. Bạn chỉ
                                     target.messages.push({
                                       sender: "Hệ thống",
                                       content: `Người chơi đã xóa ${pName} ra khỏi cuộc trò chuyện nhóm.`,
-                                      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                                      timestamp: new Date().toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })
                                     });
                                   }
                                 }
@@ -1587,7 +1587,7 @@ Hãy nhắn tin trả lời tin nhắn mới nhất của ${mcName}. Bạn chỉ
                                 target.messages.push({
                                   sender: "Hệ thống",
                                   content: `${npc.name} đã được thêm vào cuộc trò chuyện nhóm.`,
-                                  timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                                  timestamp: new Date().toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })
                                 });
                               }
                             }
