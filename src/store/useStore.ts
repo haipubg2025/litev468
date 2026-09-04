@@ -118,6 +118,8 @@ interface GameState {
     disableDefaultNpcRelationships?: boolean;
     customMcFields?: Array<{ id: string; label: string; type: "input" | "textarea"; description?: string; aiRequirement?: string; isArray?: boolean; subFields?: Array<{ label: string; description: string; aiRequirement: string }> }>;
     customNpcFields?: Array<{ id: string; label: string; type: "input" | "textarea"; description?: string; aiRequirement?: string; isArray?: boolean; subFields?: Array<{ label: string; description: string; aiRequirement: string }> }>;
+    customMcConditions?: { enabled: boolean; referenceFieldId: string; rules: Array<{ targetFieldId: string; threshold: number }> };
+    customNpcConditions?: { enabled: boolean; referenceFieldId: string; rules: Array<{ targetFieldId: string; threshold: number }> };
     mcData: {
       name: string;
       fullName: string;
@@ -304,6 +306,10 @@ interface GameState {
   setIsDramaticEnabled: (enabled: boolean) => void;
   dramaPrompt: string;
   setDramaPrompt: (prompt: string) => void;
+  dramaChance: number;
+  setDramaChance: (chance: number) => void;
+  pendingDramaResult: { roll: number; chance: number; isDrama: boolean } | null;
+  setPendingDramaResult: (result: { roll: number; chance: number; isDrama: boolean } | null) => void;
   isStrictEndEnabled: boolean;
   setIsStrictEndEnabled: (enabled: boolean) => void;
   isSuggestionsLocked: boolean;
@@ -1016,6 +1022,16 @@ export const useStore = create<GameState>()(
       colorConfig: {},
       isDramaticEnabled: false,
       dramaPrompt: "",
+      dramaChance: 50,
+      setDramaChance: (chance) =>
+        set((state) => {
+          state.dramaChance = chance;
+        }),
+      pendingDramaResult: null,
+      setPendingDramaResult: (result) =>
+        set((state) => {
+          state.pendingDramaResult = result;
+        }),
       setDramaPrompt: (prompt) =>
         set((state) => {
           state.dramaPrompt = prompt;
@@ -1293,6 +1309,7 @@ export const useStore = create<GameState>()(
           if (!draft.gameData.id) draft.gameData.id = currentId;
           draft.gameData.isDramaticEnabled = draft.isDramaticEnabled;
           draft.gameData.dramaPrompt = draft.dramaPrompt;
+          draft.gameData.dramaChance = draft.dramaChance;
           draft.gameData.phoneAppControl = draft.phoneAppControl;
 
           const existingIdx = draft.saves.findIndex((s) => {
@@ -1358,6 +1375,7 @@ export const useStore = create<GameState>()(
           if (!draft.gameData.id) draft.gameData.id = currentId;
           draft.gameData.isDramaticEnabled = draft.isDramaticEnabled;
           draft.gameData.dramaPrompt = draft.dramaPrompt;
+          draft.gameData.dramaChance = draft.dramaChance;
           draft.gameData.phoneAppControl = draft.phoneAppControl;
 
           const existingIdx = draft.saves.findIndex((s) => s.id === autoSaveId);
@@ -1435,6 +1453,11 @@ export const useStore = create<GameState>()(
               draft.dramaPrompt = s.gameData.dramaPrompt;
             } else {
               draft.dramaPrompt = "";
+            }
+            if (s.gameData?.dramaChance !== undefined) {
+              draft.dramaChance = s.gameData.dramaChance;
+            } else {
+              draft.dramaChance = 50;
             }
             if (s.playerRules !== undefined && s.playerRules !== null) {
               draft.playerRules = s.playerRules;
@@ -1567,6 +1590,11 @@ export const useStore = create<GameState>()(
             } else {
               draft.dramaPrompt = "";
             }
+            if (latest.gameData?.dramaChance !== undefined) {
+              draft.dramaChance = latest.gameData.dramaChance;
+            } else {
+              draft.dramaChance = 50;
+            }
             if (latest.playerRules !== undefined && latest.playerRules !== null) {
               draft.playerRules = latest.playerRules;
             } else if (latest.gameData && latest.gameData.playerRules !== undefined && latest.gameData.playerRules !== null) {
@@ -1671,6 +1699,7 @@ export const useStore = create<GameState>()(
         useColorEnabled: state.useColorEnabled,
         colorConfig: state.colorConfig,
         isDramaticEnabled: state.isDramaticEnabled,
+        dramaChance: state.dramaChance,
         isStrictEndEnabled: state.isStrictEndEnabled,
         isSuggestionsLocked: state.isSuggestionsLocked,
         isHardModeEnabled: state.isHardModeEnabled,

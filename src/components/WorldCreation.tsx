@@ -44,6 +44,7 @@ import {
   safeParseJSON
 } from "../utils/jsonRepair";
 import { isRelationshipField, ensureUniqueNpcIds } from "../utils/relationshipUtils";
+import ConditionalFieldsEditor from "./ConditionalFieldsEditor";
 
 const DEFAULT_MC_FIELDS = [
   { id: "fullName", label: "Họ và tên", type: "input", description: "Họ và tên đầy đủ của nhân vật theo đúng quy chuẩn ngôn ngữ bối cảnh (Ví dụ: 'Nguyễn Thanh Tùng', 'Arthur Pendragon'). Tránh đặt tên nửa mùa hoặc lai tạp phong cách trái bối cảnh.", aiRequirement: "Bảo toàn dữ liệu cũ nếu phù hợp, bám sát phong cách ngôn ngữ của bối cảnh." },
@@ -3239,6 +3240,7 @@ LƯU Ý QUAN TRỌNG: Hãy tạo ra ĐỦ số lượng Location như được y
                                     </button>
                                   </div>
                                 )}
+                                <ConditionalFieldsEditor type="mc" theme={theme} />
                                 </div>
                               )}
                             </div>
@@ -3998,7 +4000,7 @@ LƯU Ý QUAN TRỌNG: Hãy tạo ra ĐỦ số lượng Location như được y
                                 <span className={`text-xs sm:text-sm font-bold ${theme.group === "Dark" ? "text-purple-300" : "text-purple-900"}`}>
                                   Tắt mảng Nhân Quả / Quan Hệ mặc định để dùng Custom
                                 </span>
-                                <span className="text-[11px] opacity-70">
+                                <span className={`text-[11px] opacity-70 ${theme.group === "Dark" ? "text-purple-200" : "text-purple-800"}`}>
                                   Cho phép tự do thiết kế các trường/mảng quan hệ tùy ý (subFields) mà không bị ép khuôn mẫu quan hệ cố định của hệ thống.
                                 </span>
                               </div>
@@ -4273,6 +4275,7 @@ LƯU Ý QUAN TRỌNG: Hãy tạo ra ĐỦ số lượng Location như được y
                                 </button>
                               </div>
                             )}
+                            <ConditionalFieldsEditor type="npc" theme={theme} />
                             </div>
                           )}
                         </div>

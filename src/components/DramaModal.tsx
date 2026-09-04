@@ -15,6 +15,8 @@ export default function DramaModal({ isOpen, onClose, theme }: DramaModalProps) 
   const setIsDramaticEnabled = useStore(state => state.setIsDramaticEnabled);
   const dramaPrompt = useStore(state => state.dramaPrompt || "");
   const setDramaPrompt = useStore(state => state.setDramaPrompt);
+  const dramaChance = useStore(state => state.dramaChance ?? 50);
+  const setDramaChance = useStore(state => state.setDramaChance);
   
   const isDark = theme.group === 'Dark';
 
@@ -55,40 +57,68 @@ export default function DramaModal({ isOpen, onClose, theme }: DramaModalProps) 
             <div className="flex-1 overflow-y-auto p-6 space-y-8 custom-scrollbar">
               
               {/* ON/OFF Control */}
-              <div className="space-y-3">
+              <div className="flex items-center justify-between">
                 <label className="text-sm font-bold uppercase tracking-widest opacity-70 flex items-center gap-2">
                   <Power size={14} /> TRẠNG THÁI CHẾ ĐỘ
                 </label>
-                <div className="flex gap-4">
+                <div className="flex bg-black/10 dark:bg-white/5 p-1 rounded-xl gap-1">
                   <button
                     onClick={() => {
                       setIsDramaticEnabled(true);
                       toast.success("Đã bật chế độ Kịch Tính!");
                     }}
-                    className={`flex-1 flex items-center justify-center gap-2 py-4 rounded-xl font-bold transition-all border-2 ${
+                    className={`flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg font-bold transition-all text-sm ${
                       isDramaticEnabled 
-                        ? 'bg-red-600 border-red-500 text-white shadow-[0_0_20px_rgba(220,38,38,0.4)] scale-[1.02]' 
-                        : isDark ? 'bg-black/40 border-white/5 text-white/50 hover:bg-black/60' : `${theme.bgClass} border-black/10 ${theme.textSecondary} hover:opacity-80`
+                        ? 'bg-red-600 text-white shadow-lg shadow-red-500/30' 
+                        : isDark ? 'text-white/50 hover:bg-white/5 hover:text-white' : 'text-slate-500 hover:bg-black/5 hover:text-slate-800'
                     }`}
                   >
-                    <Check size={20} className={isDramaticEnabled ? 'opacity-100' : 'opacity-0'} />
-                    BẬT (ON)
+                    BẬT
                   </button>
                   <button
                     onClick={() => {
                       setIsDramaticEnabled(false);
                       toast.success("Đã tắt chế độ Kịch Tính!");
                     }}
-                    className={`flex-1 flex items-center justify-center gap-2 py-4 rounded-xl font-bold transition-all border-2 ${
+                    className={`flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg font-bold transition-all text-sm ${
                       !isDramaticEnabled 
-                        ? isDark ? 'bg-white/10 border-white/20 text-white scale-[1.02]' : 'bg-slate-800 border-slate-700 text-white scale-[1.02]' 
-                        : isDark ? 'bg-black/40 border-white/5 text-white/50 hover:bg-black/60' : `${theme.bgClass} border-black/10 ${theme.textSecondary} hover:opacity-80`
+                        ? isDark ? 'bg-white/10 text-white shadow-lg' : 'bg-white text-slate-800 shadow-sm border border-black/5' 
+                        : isDark ? 'text-white/50 hover:bg-white/5 hover:text-white' : 'text-slate-500 hover:bg-black/5 hover:text-slate-800'
                     }`}
                   >
-                    <X size={20} className={!isDramaticEnabled ? 'opacity-100' : 'opacity-0'} />
-                    TẮT (OFF)
+                    TẮT
                   </button>
                 </div>
+              </div>
+
+              {/* Probability Input */}
+              <div className="space-y-3">
+                <label className="text-sm font-bold uppercase tracking-widest opacity-70 flex items-center justify-between">
+                  <span>TỈ LỆ DRAMA XUẤT HIỆN (%)</span>
+                </label>
+                <div className="flex items-center gap-4">
+                  <input
+                    type="number"
+                    min="1"
+                    max="100"
+                    value={dramaChance}
+                    onChange={(e) => {
+                      let val = parseInt(e.target.value);
+                      if (isNaN(val)) val = 1;
+                      if (val < 1) val = 1;
+                      if (val > 100) val = 100;
+                      setDramaChance(val);
+                    }}
+                    className={`flex-1 p-4 rounded-xl font-bold border outline-none ${
+                      isDark
+                        ? 'bg-black/50 border-white/10 text-white focus:border-red-500/50'
+                        : `${theme.bgClass} border-black/10 ${theme.textPrimary} focus:border-red-500/50`
+                    }`}
+                  />
+                </div>
+                <p className={`text-xs ${isDark ? 'text-white/40' : 'text-slate-500'}`}>
+                  Khi Drama BẬT, mỗi lượt chơi sẽ tung xúc xắc từ 1-100. Nếu kết quả <b>lớn hơn hoặc bằng</b> {dramaChance}, AI sẽ bắt buộc tạo biến cố kịch tính.
+                </p>
               </div>
 
               {/* Prompt Input */}

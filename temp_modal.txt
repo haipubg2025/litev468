@@ -1,0 +1,250 @@
+                              type: "input",
+                              description: "",
+                              aiRequirement: "",
+                            },
+                          ];
+                          setTempCustomFields(newFields);
+                          setIsFieldsOpen(true); // Tự động mở rộng khi thêm mới
+                        }}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs shadow-md transition-all cursor-pointer shrink-0"
+                      >
+                        <Plus className="w-3.5 h-3.5" /> Thêm trường mới
+                      </button>
+                    </div>
+
+                    {isFieldsOpen && (
+                      tempCustomFields.length === 0 ? (
+                        <div className="p-8 text-center border border-dashed border-white/10 rounded-xl text-xs sm:text-sm opacity-60">
+                          Chưa có trường tùy chỉnh nào. Bấm "AI Tạo Bảng", "Tải Mẫu Mặc Định" hoặc "Thêm trường mới" để bắt đầu!
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                          {tempCustomFields.map((field: any, idx: number) => (
+                            <div
+                              key={idx}
+                              className={`p-3.5 rounded-xl border flex flex-col gap-2.5 transition-all shadow-sm ${
+                                isDark ? "bg-black/30 border-white/10" : "bg-black/5 border-black/10"
+                              }`}
+                            >
+                              <div className="flex flex-col gap-1">
+                                <label className="text-[10px] uppercase font-bold tracking-wider opacity-70">
+                                  Tên hiển thị:
+                                </label>
+                                <input
+                                  type="text"
+                                  placeholder="Tên trường (VD: Chỉ số Sức mạnh, Tuyệt kỹ...)"
+                                  className={`w-full bg-transparent border-b ${
+                                    isDark ? "border-white/20 text-white" : "border-black/20 text-black"
+                                  } outline-none px-1 py-0.5 text-xs sm:text-sm font-bold`}
+                                  value={field.label || ""}
+                                  onChange={(e) => {
+                                    const newFields = [...tempCustomFields];
+                                    newFields[idx] = { ...newFields[idx], label: e.target.value };
+                                    setTempCustomFields(newFields);
+                                  }}
+                                />
+                              </div>
+
+{field.isArray ? (
+                                <div className="flex flex-col gap-2 mt-1">
+                                  <div className="flex items-center justify-between">
+                                    <label className="text-[10px] uppercase font-bold tracking-wider opacity-70">
+                                      Các trường con (Sub-fields):
+                                    </label>
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        const newFields = [...tempCustomFields];
+                                        const subFields = newFields[idx].subFields || [];
+                                        newFields[idx] = { ...newFields[idx], subFields: [...subFields, { label: "", description: "", aiRequirement: "" }] };
+                                        setTempCustomFields(newFields);
+                                      }}
+                                      className={`px-2 py-1 text-[9px] font-bold rounded border ${isDark ? "border-purple-500/30 text-purple-400 bg-purple-500/10 hover:bg-purple-500/20" : "border-purple-300 text-purple-700 bg-purple-50 hover:bg-purple-100"}`}
+                                    >
+                                      + Thêm trường con
+                                    </button>
+                                  </div>
+                                  {(field.subFields || []).map((subField: any, subIdx: number) => (
+                                    <div key={subIdx} className={`p-2 rounded-lg border border-dashed flex flex-col gap-1.5 relative ${isDark ? "border-white/20 bg-black/40" : "border-black/20 bg-white/40"}`}>
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          const newFields = [...tempCustomFields];
+                                          newFields[idx].subFields.splice(subIdx, 1);
+                                          setTempCustomFields(newFields);
+                                        }}
+                                        className="absolute top-1 right-1 w-5 h-5 flex items-center justify-center rounded-full bg-red-500/10 text-red-500 hover:bg-red-500/20"
+                                      >
+                                        <X className="w-3 h-3" />
+                                      </button>
+                                      <input
+                                        type="text"
+                                        placeholder="Tên trường con (VD: Tên, Mô tả...)"
+                                        className={`w-[calc(100%-24px)] bg-transparent border-b ${isDark ? "border-white/20 text-white" : "border-black/20 text-black"} outline-none px-1 text-xs font-bold`}
+                                        value={subField.label || ""}
+                                        onChange={(e) => {
+                                          const newFields = [...tempCustomFields];
+                                          newFields[idx].subFields[subIdx].label = e.target.value;
+                                          setTempCustomFields(newFields);
+                                        }}
+                                      />
+                                      <textarea
+                                        rows={1}
+                                        placeholder="Định nghĩa/Nội dung"
+                                        className={`w-full bg-transparent border rounded p-1.5 ${isDark ? "border-white/10 text-white/80" : "border-black/10 text-black/80"} outline-none text-[10px] resize-y`}
+                                        value={subField.description || ""}
+                                        onChange={(e) => {
+                                          const newFields = [...tempCustomFields];
+                                          newFields[idx].subFields[subIdx].description = e.target.value;
+                                          setTempCustomFields(newFields);
+                                        }}
+                                      />
+                                      <textarea
+                                        rows={1}
+                                        placeholder="Yêu cầu với AI"
+                                        className={`w-full bg-transparent border rounded p-1.5 ${isDark ? "border-white/10 text-white/80" : "border-black/10 text-black/80"} outline-none text-[10px] resize-y`}
+                                        value={subField.aiRequirement || ""}
+                                        onChange={(e) => {
+                                          const newFields = [...tempCustomFields];
+                                          newFields[idx].subFields[subIdx].aiRequirement = e.target.value;
+                                          setTempCustomFields(newFields);
+                                        }}
+                                      />
+                                    </div>
+                                  ))}
+                                  {(!field.subFields || field.subFields.length === 0) && (
+                                    <div className={`text-[10px] text-center p-2 rounded border border-dashed ${isDark ? "border-white/10 text-white/40" : "border-black/10 text-black/40"}`}>
+                                      Chưa có trường con. Nhấn "+ Thêm trường con" để tạo khuôn mẫu.
+                                    </div>
+                                  )}
+                                </div>
+                              ) : (
+                                <>
+                                  <div className="flex flex-col gap-1">
+                                    <label className="text-[10px] uppercase font-bold tracking-wider opacity-70">
+                                      Hướng dẫn về định nghĩa/nội dung:
+                                    </label>
+                                    <textarea
+                                      rows={2}
+                                      placeholder="Định nghĩa ý nghĩa và nội dung trường này..."
+                                      className={`w-full bg-transparent border rounded-lg p-2 ${
+                                        isDark ? "border-white/10 text-white/80 bg-black/20" : "border-black/10 text-black/80 bg-white/40"
+                                      } outline-none text-xs resize-y`}
+                                      value={field.description || ""}
+                                      onChange={(e) => {
+                                        const newFields = [...tempCustomFields];
+                                        newFields[idx] = { ...newFields[idx], description: e.target.value };
+                                        setTempCustomFields(newFields);
+                                      }}
+                                    />
+                                  </div>
+                                  <div className="flex flex-col gap-1">
+                                    <label className="text-[10px] uppercase font-bold tracking-wider opacity-70">
+                                      Yêu cầu với AI:
+                                    </label>
+                                    <textarea
+                                      rows={2}
+                                      placeholder="Yêu cầu AI viết đúng ý (VD: Viết 2-3 câu ngắn gọn, hoặc bám sát bối cảnh...)"
+                                      className={`w-full bg-transparent border rounded-lg p-2 ${
+                                        isDark ? "border-white/10 text-white/80 bg-black/20" : "border-black/10 text-black/80 bg-white/40"
+                                      } outline-none text-xs resize-y`}
+                                      value={field.aiRequirement || ""}
+                                      onChange={(e) => {
+                                        const newFields = [...tempCustomFields];
+                                        newFields[idx] = { ...newFields[idx], aiRequirement: e.target.value };
+                                        setTempCustomFields(newFields);
+                                      }}
+                                    />
+                                  </div>
+                                </>
+                              )}
+
+                              <div className="flex items-center justify-between mt-1 pt-1.5 border-t border-white/5 gap-2">
+                                <div className="flex items-center gap-3">
+                                  <div className="flex items-center gap-1">
+                                    <label className="text-[10px] uppercase font-bold opacity-70">
+                                      Loại:
+                                    </label>
+                                    <select
+                                      className={`bg-transparent text-xs font-bold outline-none cursor-pointer ${
+                                        isDark ? "text-white" : "text-black"
+                                      }`}
+                                      value={field.type === "textarea" ? "textarea" : "input"}
+                                      onChange={(e) => {
+                                        const newFields = [...tempCustomFields];
+                                        newFields[idx] = {
+                                          ...newFields[idx],
+                                          type: e.target.value as "input" | "textarea",
+                                        };
+                                        setTempCustomFields(newFields);
+                                      }}
+                                    >
+                                      <option value="input" className="bg-slate-800 text-white">
+                                        Dòng ngắn
+                                      </option>
+                                      <option value="textarea" className="bg-slate-800 text-white">
+                                        Nhiều dòng
+                                      </option>
+                                    </select>
+                                  </div>
+
+                                  <label className="flex items-center gap-1 cursor-pointer select-none">
+                                    <input
+                                      type="checkbox"
+                                      checked={field.isArray || false}
+                                      onChange={(e) => {
+                                        const newFields = [...tempCustomFields];
+                                        newFields[idx] = {
+                                          ...newFields[idx],
+                                          isArray: e.target.checked,
+                                        };
+                                        setTempCustomFields(newFields);
+                                      }}
+                                      className="w-3.5 h-3.5 accent-purple-600 rounded cursor-pointer"
+                                    />
+                                    <span className="text-[10px] uppercase font-black tracking-wider opacity-70">
+                                      Tạo mảng
+                                    </span>
+                                  </label>
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const newFields = tempCustomFields.filter((_, i) => i !== idx);
+                                    setTempCustomFields(newFields);
+                                  }}
+                                  className="text-red-400 hover:text-red-300 p-1 hover:bg-red-500/10 rounded-lg transition-colors cursor-pointer"
+                                  title="Xóa trường này"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const newFields = [
+                                ...tempCustomFields,
+                                {
+                                  id: "field" + Date.now(),
+                                  label: "Trường mới",
+                                  type: "input",
+                                  description: "",
+                                  aiRequirement: "",
+                                },
+                              ];
+                              setTempCustomFields(newFields);
+                            }}
+                            className={`p-3 min-h-[100px] rounded-xl border border-dashed flex flex-col items-center justify-center gap-1.5 cursor-pointer transition-colors ${
+                              isDark
+                                ? "border-white/20 hover:bg-white/5 text-white/50 hover:text-white"
+                                : "border-black/20 hover:bg-black/5 text-black/50 hover:text-black"
+                            }`}
+                          >
+                            <Plus className="w-5 h-5" />
+                            <span className="text-xs font-bold">Thêm trường</span>
+                          </button>
+                        </div>
+                      )

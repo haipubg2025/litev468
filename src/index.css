@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@custom-variant dark (&:is(.dark *));
 @custom-variant dark-theme (&:is(.dark-theme *));
 
 @layer components {

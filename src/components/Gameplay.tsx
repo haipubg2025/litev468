@@ -83,6 +83,7 @@ import {
 import { sanitizeAndFixInlineHtml } from "../utils/htmlSanitizer";
 import { filterSensitiveWords, stripShortTags, processShortCustomTags } from "../utils/wordFilter";
 import { DEFAULT_COLOR_CONFIG, DEFAULT_LIGHT_COLOR_CONFIG } from "./ColorModal";
+import { getActiveCustomFields } from "../utils/conditionalFields";
 
 const isBuiltInField = (key: string): boolean => {
   const BUILT_IN_FIELDS = [
@@ -241,7 +242,8 @@ const formatNPCsCodex = (
   npcTemplateMode: "default" | "custom" = "default",
   customNpcFields: any[] = [],
   disableDefaultNpcRelationships: boolean = false,
-  partyTags?: Record<string, string[]>
+  partyTags?: Record<string, string[]>,
+  customNpcConditions?: any
 ) => {
   if (!npcs || !Array.isArray(npcs)) return "Không có NPC nào.";
   const validNpcs = npcs.filter(Boolean);
@@ -472,11 +474,13 @@ const formatNPCsCodex = (
       lines.push(`  + TAG TỔ ĐỘI / QUAN HỆ (BẮT BUỘC CHÚ Ý ĐỂ XỬ LÝ TÌNH HUỐNG): ${partyTags[npcId].join(", ")}`);
     }
 
-    if (npcTemplateMode === "custom" && customNpcFields && customNpcFields.length > 0) {
+    const activeCustomFields = getActiveCustomFields(customNpcFields, customNpcConditions, npc);
+
+    if (npcTemplateMode === "custom" && activeCustomFields && activeCustomFields.length > 0) {
       const customFieldLines: string[] = [];
       const handledKeys = new Set<string>();
 
-      customNpcFields.forEach((f) => {
+      activeCustomFields.forEach((f: any) => {
         handledKeys.add(f.id);
         const val = getCharacterFieldValue(npc, f.id);
         if (val) {
@@ -2921,8 +2925,10 @@ export default function Gameplay() {
     };
 
     // Lọc bỏ customMcFields liên quan đến nhân quả hoặc mối quan hệ
-    const customMcFields = (gameData?.customMcFields || []).filter((f: any) => 
-      !isForbiddenField(f?.id, f?.label, f?.description)
+    const customMcFields = getActiveCustomFields(
+      (gameData?.customMcFields || []).filter((f: any) => !isForbiddenField(f?.id, f?.label, f?.description)),
+      gameData?.customMcConditions,
+      mcDataSanitized
     );
 
     // Tiến hành lọc bỏ hoàn toàn các trường cấm trong dữ liệu thực tế của MC (mcData và originalMcData)
@@ -2982,10 +2988,10 @@ THÔNG TIN NHÂN VẬT CHÍNH - MC (BẢN GỐC / SỐ 1 - CHỈ ĐỌC. TUYỆT
 ${formatCodexData(originalMcDataSanitized || mcDataSanitized, [], mcTemplateMode, customMcFields)}
 
 DANH SÁCH NPCs (BẢN HIỆN HÀNH / SỐ 2 - ĐƯỢC PHÉP CẬP NHẬT. LƯU Ý BẢO TOÀN DỮ LIỆU CŨ: KHI CẬP NHẬT TRƯỜNG NÀO, BẮT BUỘC PHẢI XEM XÉT DỮ LIỆU CŨ TRƯỚC; TUYỆT ĐỐI KHÔNG CẮT NGẮN HAY RÚT GỌN NỘI DUNG CŨ; CÁI GÌ CÒN PHÙ HỢP THÌ GIỮ NGUYÊN, CÁI GÌ THAY ĐỔI MỚI SỬA LẠI HOẶC THAY THẾ/NỐI TIẾP):
-${formatNPCsCodex(gameData.npcs, mcLocationStr, actionStr, mcDataSanitized, messages, npcTemplateMode, customNpcFields, gameData?.disableDefaultNpcRelationships || false, gameData?.partyTags)}
+${formatNPCsCodex(gameData.npcs, mcLocationStr, actionStr, mcDataSanitized, messages, npcTemplateMode, customNpcFields, gameData?.disableDefaultNpcRelationships || false, gameData?.partyTags, gameData?.customNpcConditions)}
 
 DANH SÁCH NPCs (BẢN GỐC / SỐ 1 - CHỈ ĐỌC. TUYỆT ĐỐI NGHIÊM CẤM SỬA ĐỔI):
-${formatNPCsCodex(gameData.originalNpcs || gameData.npcs, mcLocationStr, actionStr, mcDataSanitized, messages, npcTemplateMode, customNpcFields, gameData?.disableDefaultNpcRelationships || false, gameData?.partyTags)}
+${formatNPCsCodex(gameData.originalNpcs || gameData.npcs, mcLocationStr, actionStr, mcDataSanitized, messages, npcTemplateMode, customNpcFields, gameData?.disableDefaultNpcRelationships || false, gameData?.partyTags, gameData?.customNpcConditions)}
 
 NHIỆM VỤ CỦA BẠN: HÃY TẠO RA LƯỢT CHƠI ĐẦU TIÊN (MỞ MÀN) - LƯỢT 0000. 
 ĐẶC BIỆT QUAN TRỌNG VỀ "KỊCH BẢN MỞ ĐẦU" (starterScenario): Bạn BẮT BUỘC phải mang trọn vẹn toàn bộ nội dung của mục "KỊCH BẢN MỞ ĐẦU" (nếu có trong Thông tin thế giới) vào chính văn Lượt 0000. Bạn phải diễn giải, phân chia và triển khai nội dung đó sao cho hợp lý, sinh động, logic và đạt đủ số chữ (Target Word Count) được yêu cầu. NGHIÊM CẤM TUYỆT ĐỐI việc cắt xén, làm mất, tóm tắt sơ sài hay rút gọn nội dung mà người chơi đã duyệt trong mục KỊCH BẢN MỞ ĐẦU.
@@ -3190,10 +3196,10 @@ ${formatCodexData(mcDataSanitized, [], mcTemplateMode, customMcFields)}
 ${formatCodexData(originalMcDataSanitized || mcDataSanitized, [], mcTemplateMode, customMcFields)}
 
 [DANH SÁCH NPCs VÀ BẢNG THÔNG TIN RIÊNG CHI TIẾT (BẢN HIỆN HÀNH / SỐ 2 - ĐƯỢC PHÉP CẬP NHẬT. LƯU Ý BẢO TOÀN DỮ LIỆU CŨ: KHI CẬP NHẬT TRƯỜNG NÀO, BẮT BUỘC PHẢI XEM XÉT DỮ LIỆU CŨ TRƯỚC; TUYỆT ĐỐI KHÔNG CẮT NGẮN HAY RÚT GỌN NỘI DUNG CŨ; CÁI GÌ CÒN PHÙ HỢP THÌ GIỮ NGUYÊN, CÁI GÌ THAY ĐỔI MỚI SỬA LẠI HOẶC THAY THẾ/NỐI TIẾP)]
-${formatNPCsCodex(gameData.npcs, mcLocationStr, actionStr, mcDataSanitized, messages, npcTemplateMode, customNpcFields, gameData?.disableDefaultNpcRelationships || false, gameData?.partyTags)}
+${formatNPCsCodex(gameData.npcs, mcLocationStr, actionStr, mcDataSanitized, messages, npcTemplateMode, customNpcFields, gameData?.disableDefaultNpcRelationships || false, gameData?.partyTags, gameData?.customNpcConditions)}
 
 [DANH SÁCH NPCs (BẢN GỐC / SỐ 1 - CHỈ ĐỌC. TUYỆT ĐỐI NGHIÊM CẤM SỬA ĐỔI)]
-${formatNPCsCodex(gameData.originalNpcs || gameData.npcs, mcLocationStr, actionStr, mcDataSanitized, messages, npcTemplateMode, customNpcFields, gameData?.disableDefaultNpcRelationships || false, gameData?.partyTags)}
+${formatNPCsCodex(gameData.originalNpcs || gameData.npcs, mcLocationStr, actionStr, mcDataSanitized, messages, npcTemplateMode, customNpcFields, gameData?.disableDefaultNpcRelationships || false, gameData?.partyTags, gameData?.customNpcConditions)}
 
 ${detailed10TurnsMemoryText}${memoryText}[QUAN TRỌNG] TOÀN BỘ DIỄN BIẾN CHI TIẾT CỦA ${memoryFullTurnsCount} LƯỢT CHƠI GẦN ĐÂY NHẤT ĐỂ AI LIÊN KẾT LIỀN MẠCH KHÔNG GIAN/THỜI GIAN:
 ${historyText}
@@ -3255,7 +3261,37 @@ Hành động tiếp theo của Nhân vật chính (MC): ${effectiveUserAction}`
     contextStr += phoneChatsStr + discordChatsStr;
 
     const dramaPromptText = useStore.getState().dramaPrompt?.trim();
-    if (isDramatic || isDramaTriggeredAction) {
+    let activeDrama = isDramaTriggeredAction;
+    let rollText = "";
+    
+    if (isDramatic && !activeDrama) {
+        const pendingResult = useStore.getState().pendingDramaResult;
+        let roll, chance;
+        
+        if (pendingResult) {
+            roll = pendingResult.roll;
+            chance = pendingResult.chance;
+            useStore.getState().setPendingDramaResult(null);
+        } else {
+            chance = useStore.getState().dramaChance ?? 50;
+            roll = Math.floor(Math.random() * 100) + 1;
+        }
+
+        if (roll >= chance) {
+            activeDrama = true;
+            rollText = `\n\n[HỆ THỐNG GHI NHẬN TUNG XÚC XẮC DRAMA TRƯỚC KHI GỌI AI]: Xúc xắc ra ${roll}/${chance} (Lớn hơn hoặc bằng tỉ lệ). KẾT QUẢ: BẮT BUỘC TẠO DRAMA TRONG LƯỢT NÀY.`;
+        } else {
+            rollText = `\n\n[HỆ THỐNG GHI NHẬN TUNG XÚC XẮC DRAMA TRƯỚC KHI GỌI AI]: Xúc xắc ra ${roll}/${chance} (Nhỏ hơn tỉ lệ). KẾT QUẢ: KHÔNG TẠO DRAMA TRONG LƯỢT NÀY. Hãy giữ nhịp độ cốt truyện phát triển bình thường, tự nhiên theo diễn biến.`;
+        }
+    } else if (isDramaTriggeredAction) {
+        rollText = `\n\n[HỆ THỐNG GHI NHẬN LỆNH ÉP BUỘC DRAMA TỪ NGƯỜI CHƠI]: KẾT QUẢ: BẮT BUỘC TẠO DRAMA TRONG LƯỢT NÀY.`;
+    }
+
+    if (rollText) {
+        contextStr += rollText;
+    }
+
+    if (activeDrama) {
       contextStr += `\n\n[CHỈ THỊ ĐẶC BIỆT TỪ HỆ THỐNG - CHẾ ĐỘ KỊCH TÍNH (DRAMA MODE) ĐANG BẬT - BẮT BUỘC THỰC THI 100%]:
 Chế độ "KỊCH TÍNH" đang được BẬT trên hệ thống. Giao phó cho [Chuyên Gia Đạo Diễn Kịch Tính & Cú Twist] kết hợp cùng [Các Chuyên Gia Chấp Bút Chính Văn] BẮT BUỘC phải thực hiện suy nghĩ sâu (deep thinking) ở Bước 1 để tự mình định đoạt và thiết kế 1 sự kiện kịch tính/biến cố/plot twist bùng nổ ngay lập tức trong lượt này:
 ${dramaPromptText ? `- GỢI Ý/YÊU CẦU KỊCH TÍNH TỪ NGƯỜI CHƠI (AI BẮT BUỘC PHẢI ĐỌC HIỂU VÀ ÁP DỤNG TRỰC TIẾP VÀO SỰ KIỆN KỊCH TÍNH): "${dramaPromptText}"` : '- Bản chất sự kiện: Có thể là SFW (lành mạnh, an toàn) hoặc NSFW (nhạy cảm, ghen tuông tình ái thể xác bạo liệt, cưỡng ôm cưỡng hôn, ân ái hoang dại...) - hoàn toàn do AI tự định đoạt dựa trên suy nghĩ sâu và logic của bối cảnh thế giới hiện tại.'}
@@ -3277,7 +3313,7 @@ ${dramaPromptText ? `- GỢI Ý/YÊU CẦU KỊCH TÍNH TỪ NGƯỜI CHƠI (AI 
       finalPlayerRules,
       useColorEnabled,
       theme.group,
-      isDramatic || isDramaTriggeredAction,
+      activeDrama,
       colorConfig,
       isHardModeEnabled,
       topP,
@@ -4000,6 +4036,23 @@ ${dramaPromptText ? `- GỢI Ý/YÊU CẦU KỊCH TÍNH TỪ NGƯỜI CHƠI (AI 
       if (!willRetry) {
         setIsGenerating(false);
         setIsGeneratingStream(false);
+        
+        // 🎲 Roll drama dice for NEXT turn (after 10s delay as requested)
+        const isDramaticEnabled = useStore.getState().isDramaticEnabled;
+        if (isDramaticEnabled) {
+           setTimeout(() => {
+             const chance = useStore.getState().dramaChance ?? 50;
+             const roll = Math.floor(Math.random() * 100) + 1;
+             const isDrama = roll >= chance;
+             useStore.getState().setPendingDramaResult({ roll, chance, isDrama });
+             
+             if (isDrama) {
+                 toast.error(`🎲 [KỊCH TÍNH] Xúc xắc ra ${roll}/${chance}. Cảnh báo: Biến cố sẽ ập đến ở lượt kế tiếp!`, { duration: 5000 });
+             } else {
+                 toast.success(`🎲 [KỊCH TÍNH] Xúc xắc ra ${roll}/${chance}. Nhịp độ sẽ bình yên ở lượt kế tiếp.`, { duration: 5000 });
+             }
+           }, 10000);
+        }
       }
       scrollToTurn(aiMsgId, "instant");
     }

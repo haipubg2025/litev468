@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { X, Check, ArrowUpToLine, ArrowDownToLine, Plus, Trash2 } from 'lucide-react';
 import { useStore } from '../store/useStore';
+import { getActiveCustomFields } from '../utils/conditionalFields';
 import { stripHtmlTags } from '../utils/htmlSanitizer';
 import { toast } from '../utils/toast';
 
@@ -456,9 +457,18 @@ export default function NpcUpdateModal({ npc, npcIndex, onClose, onApply }: NpcU
   const gameData = useStore(state => state.gameData);
   const setGameData = useStore(state => state.setGameData);
 
-  const customFields = npcIndex === -1
+  const customFieldsRaw = npcIndex === -1
     ? (gameData?.customMcFields || [])
     : (gameData?.customNpcFields || []);
+
+  // UI always shows all fields, conditions are only for AI prompts
+  const customFields = customFieldsRaw
+    .filter((f: any) => f.enabled !== false)
+    .sort((a: any, b: any) => {
+      const orderA = typeof a.order === "number" ? a.order : 999;
+      const orderB = typeof b.order === "number" ? b.order : 999;
+      return orderA - orderB;
+    });
 
   const isCustomMode = npcIndex === -1
     ? (gameData?.mcTemplateMode === "custom")

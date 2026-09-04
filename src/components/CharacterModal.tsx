@@ -43,6 +43,7 @@ import { storageService } from "../services/storageService";
 import { aiService } from "../services/aiService";
 import NpcUpdateModal from "./NpcUpdateModal";
 import { stripHtmlTags } from "../utils/htmlSanitizer";
+import { getActiveCustomFields } from "../utils/conditionalFields";
 
 const isBuiltInField = (key: string): boolean => {
   const BUILT_IN_FIELDS = [
@@ -1197,7 +1198,16 @@ export default function CharacterModal({
   const isCustomMode = type === "mc" ? gameData?.mcTemplateMode === "custom" : gameData?.npcTemplateMode === "custom";
   
   const customFieldsRaw = type === "mc" ? (gameData?.customMcFields || []) : (gameData?.customNpcFields || []);
-  const customFields = customFieldsRaw.map((f: any) => {
+
+  // UI always shows all fields, conditions are only for AI prompts
+  const customFields = customFieldsRaw
+    .filter((f: any) => f.enabled !== false)
+    .sort((a: any, b: any) => {
+      const orderA = typeof a.order === "number" ? a.order : 999;
+      const orderB = typeof b.order === "number" ? b.order : 999;
+      return orderA - orderB;
+    })
+    .map((f: any) => {
     if (f.id === "powers" || f.id === "skills") {
       return { ...f, isArray: true };
     }
@@ -3149,7 +3159,7 @@ LƯU Ý:
                           <span className={`text-xs sm:text-sm font-bold ${isDark ? "text-purple-300" : "text-purple-900"}`}>
                             Tắt mảng Nhân Quả / Quan Hệ mặc định để dùng Custom
                           </span>
-                          <span className="text-[11px] opacity-70">
+                          <span className={`text-[11px] opacity-70 ${isDark ? "text-purple-200" : "text-purple-800"}`}>
                             Cho phép tự do thiết kế các trường/mảng quan hệ tùy ý (subFields) mà không bị ép khuôn mẫu quan hệ cố định của hệ thống.
                           </span>
                         </div>
@@ -3273,6 +3283,38 @@ LƯU Ý:
                                 isDark ? "bg-black/30 border-white/10" : "bg-black/5 border-black/10"
                               }`}
                             >
+                              <div className={`flex items-center justify-between mb-2 pb-2 border-b ${isDark ? "border-white/10" : "border-black/10"}`}>
+                                <label className={`flex items-center gap-2 cursor-pointer ${isDark ? "text-white" : "text-slate-800"}`}>
+                                  <input 
+                                    type="checkbox" 
+                                    checked={field.enabled !== false} 
+                                    onChange={(e) => {
+                                      const newFields = [...tempCustomFields];
+                                      newFields[idx] = { ...newFields[idx], enabled: e.target.checked };
+                                      setTempCustomFields(newFields);
+                                    }}
+                                    className="w-4 h-4 accent-purple-600 rounded cursor-pointer"
+                                  />
+                                  <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider">Sử dụng</span>
+                                </label>
+                                <div className={`flex items-center gap-2 ${isDark ? "text-white/80" : "text-slate-700"}`}>
+                                  <span className="text-[10px] uppercase font-bold">Thứ tự:</span>
+                                  <input 
+                                    type="number" 
+                                    className={`w-14 border rounded px-1.5 py-0.5 text-xs text-center outline-none transition-colors ${
+                                      isDark 
+                                        ? "bg-black/30 border-white/20 text-white focus:border-purple-500" 
+                                        : "bg-white border-slate-300 text-slate-900 focus:border-purple-500"
+                                    }`}
+                                    value={field.order ?? idx + 1}
+                                    onChange={(e) => {
+                                      const newFields = [...tempCustomFields];
+                                      newFields[idx] = { ...newFields[idx], order: parseInt(e.target.value) || 0 };
+                                      setTempCustomFields(newFields);
+                                    }}
+                                  />
+                                </div>
+                              </div>
                               <div className="flex flex-col gap-1">
                                 <label className="text-[10px] uppercase font-bold tracking-wider opacity-70">
                                   Tên hiển thị:
