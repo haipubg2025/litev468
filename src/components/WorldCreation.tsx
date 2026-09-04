@@ -1743,6 +1743,8 @@ LƯU Ý QUAN TRỌNG: Hãy tạo ra ĐỦ số lượng Location như được y
       disableDefaultNpcRelationships: worldCreation.disableDefaultNpcRelationships || false,
       customMcFields: worldCreation.customMcFields,
       customNpcFields: worldCreation.customNpcFields,
+      customMcConditions: worldCreation.customMcConditions,
+      customNpcConditions: worldCreation.customNpcConditions,
       playerRules: playerRules || "",
       actionSuggestionsConfig: useStore.getState().actionSuggestionsConfig || "",
     });
@@ -1762,9 +1764,12 @@ LƯU Ý QUAN TRỌNG: Hãy tạo ra ĐỦ số lượng Location như được y
       worldDetails,
       mcTemplateMode: worldCreation.mcTemplateMode,
       npcTemplateMode: worldCreation.npcTemplateMode,
+      blankSlateMode: worldCreation.blankSlateMode ?? true,
       disableDefaultNpcRelationships: worldCreation.disableDefaultNpcRelationships || false,
       customMcFields: worldCreation.customMcFields,
       customNpcFields: worldCreation.customNpcFields,
+      customMcConditions: worldCreation.customMcConditions,
+      customNpcConditions: worldCreation.customNpcConditions,
     };
     const blob = new Blob([JSON.stringify(dataToSave, null, 2)], {
       type: "application/json",
@@ -1778,9 +1783,9 @@ LƯU Ý QUAN TRỌNG: Hãy tạo ra ĐỦ số lượng Location như được y
     const dateStr = `${date.getDate().toString().padStart(2, "0")}-${(date.getMonth() + 1).toString().padStart(2, "0")}-${date.getFullYear()}`;
     // Replace matching characters but keep Vietnamese characters if possible, or just replace spaces
     const safeWorldName = worldData.name
-      ? worldData.name.replace(/\\s+/g, "_")
+      ? worldData.name.replace(/\s+/g, "_")
       : "TheGioi";
-    const safeMcName = mcData.name ? mcData.name.replace(/\\s+/g, "_") : "MC";
+    const safeMcName = mcData.name ? mcData.name.replace(/\s+/g, "_") : "MC";
     a.download = `Matrix_Lite_v6_${safeWorldName}_${safeMcName}_${dateStr}.json`;
 
     document.body.appendChild(a);
@@ -1815,7 +1820,12 @@ LƯU Ý QUAN TRỌNG: Hãy tạo ra ĐỦ số lượng Location như được y
   };
 
   const exportMcCustomFields = () => {
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(worldCreation.customMcFields || [], null, 2));
+    const payload = {
+      type: "mc_custom_fields",
+      fields: worldCreation.customMcFields || [],
+      conditions: worldCreation.customMcConditions || { enabled: false, groups: [] }
+    };
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(payload, null, 2));
     const downloadAnchorNode = document.createElement('a');
     downloadAnchorNode.setAttribute("href", dataStr);
     downloadAnchorNode.setAttribute("download", "mc_custom_fields.json");
@@ -1833,8 +1843,20 @@ LƯU Ý QUAN TRỌNG: Hãy tạo ra ĐỦ số lượng Location như được y
       try {
         const data = JSON.parse(event.target?.result as string);
         if (Array.isArray(data)) {
+          // Định dạng mảng danh sách trường cũ
           updateWorldCreation({ customMcFields: data });
           toast.success("Tải bảng Custom MC thành công!");
+        } else if (data && typeof data === 'object') {
+          // Định dạng mới hỗ trợ cả danh sách trường và điều kiện kích hoạt
+          const fields = Array.isArray(data.fields) 
+            ? data.fields 
+            : (Array.isArray(data.customMcFields) ? data.customMcFields : []);
+          const conditions = data.conditions || data.customMcConditions;
+          updateWorldCreation({
+            customMcFields: fields,
+            ...(conditions !== undefined ? { customMcConditions: conditions } : {})
+          });
+          toast.success("Tải bảng Custom MC và Điều kiện thành công!");
         } else {
           toast.error("Định dạng không hợp lệ!");
         }
@@ -1848,7 +1870,12 @@ LƯU Ý QUAN TRỌNG: Hãy tạo ra ĐỦ số lượng Location như được y
   };
 
   const exportNpcCustomFields = () => {
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(worldCreation.customNpcFields || [], null, 2));
+    const payload = {
+      type: "npc_custom_fields",
+      fields: worldCreation.customNpcFields || [],
+      conditions: worldCreation.customNpcConditions || { enabled: false, groups: [] }
+    };
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(payload, null, 2));
     const downloadAnchorNode = document.createElement('a');
     downloadAnchorNode.setAttribute("href", dataStr);
     downloadAnchorNode.setAttribute("download", "npc_custom_fields.json");
@@ -1866,8 +1893,20 @@ LƯU Ý QUAN TRỌNG: Hãy tạo ra ĐỦ số lượng Location như được y
       try {
         const data = JSON.parse(event.target?.result as string);
         if (Array.isArray(data)) {
+          // Định dạng mảng danh sách trường cũ
           updateWorldCreation({ customNpcFields: data });
           toast.success("Tải bảng Custom NPCs thành công!");
+        } else if (data && typeof data === 'object') {
+          // Định dạng mới hỗ trợ cả danh sách trường và điều kiện kích hoạt
+          const fields = Array.isArray(data.fields) 
+            ? data.fields 
+            : (Array.isArray(data.customNpcFields) ? data.customNpcFields : []);
+          const conditions = data.conditions || data.customNpcConditions;
+          updateWorldCreation({
+            customNpcFields: fields,
+            ...(conditions !== undefined ? { customNpcConditions: conditions } : {})
+          });
+          toast.success("Tải bảng Custom NPCs và Điều kiện thành công!");
         } else {
           toast.error("Định dạng không hợp lệ!");
         }
