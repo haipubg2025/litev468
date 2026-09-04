@@ -2924,13 +2924,6 @@ export default function Gameplay() {
       return forbiddenKeywords.some(keyword => lowerKey.includes(keyword));
     };
 
-    // Lọc bỏ customMcFields liên quan đến nhân quả hoặc mối quan hệ
-    const customMcFields = getActiveCustomFields(
-      (gameData?.customMcFields || []).filter((f: any) => !isForbiddenField(f?.id, f?.label, f?.description)),
-      gameData?.customMcConditions,
-      mcDataSanitized
-    );
-
     // Tiến hành lọc bỏ hoàn toàn các trường cấm trong dữ liệu thực tế của MC (mcData và originalMcData)
     const sanitizeMcObj = (mcObj: any) => {
       if (!mcObj) return mcObj;
@@ -2954,6 +2947,13 @@ export default function Gameplay() {
 
     const mcDataSanitized = sanitizeMcObj(gameData.mcData);
     const originalMcDataSanitized = sanitizeMcObj(gameData.originalMcData || gameData.mcData);
+
+    // Lọc bỏ customMcFields liên quan đến nhân quả hoặc mối quan hệ
+    const customMcFields = getActiveCustomFields(
+      (gameData?.customMcFields || []).filter((f: any) => !isForbiddenField(f?.id, f?.label, f?.description)),
+      gameData?.customMcConditions,
+      mcDataSanitized
+    );
 
     const npcTemplateMode = gameData?.npcTemplateMode || "default";
     const customNpcFields = gameData?.customNpcFields || [];

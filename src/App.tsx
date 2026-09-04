@@ -41,13 +41,16 @@ function InnerApp() {
   const isDark = theme.group === 'Dark';
 
   useEffect(() => {
+    const metaColorScheme = document.querySelector('meta[name="color-scheme"]');
     if (theme.group === 'Dark') {
       document.documentElement.classList.add('dark', 'dark-theme');
-      document.documentElement.style.colorScheme = 'dark';
+      document.documentElement.style.setProperty('color-scheme', 'only dark');
+      if (metaColorScheme) metaColorScheme.setAttribute('content', 'only dark');
       document.body.style.backgroundColor = '#000000';
     } else {
       document.documentElement.classList.remove('dark', 'dark-theme');
-      document.documentElement.style.colorScheme = 'light';
+      document.documentElement.style.setProperty('color-scheme', 'only light');
+      if (metaColorScheme) metaColorScheme.setAttribute('content', 'only light');
       document.body.style.backgroundColor = '#FFFFFF';
     }
   }, [theme.group]);

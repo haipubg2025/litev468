@@ -564,8 +564,8 @@ body {
 
 /* Force Color Scheme */
 html {
-  color-scheme: light;
+  color-scheme: only light;
 }
 html.dark, html.dark-theme {
-  color-scheme: dark;
+  color-scheme: only dark;
 }

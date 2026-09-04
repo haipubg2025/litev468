@@ -118,8 +118,52 @@ interface GameState {
     disableDefaultNpcRelationships?: boolean;
     customMcFields?: Array<{ id: string; label: string; type: "input" | "textarea"; description?: string; aiRequirement?: string; isArray?: boolean; subFields?: Array<{ label: string; description: string; aiRequirement: string }> }>;
     customNpcFields?: Array<{ id: string; label: string; type: "input" | "textarea"; description?: string; aiRequirement?: string; isArray?: boolean; subFields?: Array<{ label: string; description: string; aiRequirement: string }> }>;
-    customMcConditions?: { enabled: boolean; referenceFieldId: string; rules: Array<{ targetFieldId: string; threshold: number }> };
-    customNpcConditions?: { enabled: boolean; referenceFieldId: string; rules: Array<{ targetFieldId: string; threshold: number }> };
+    customMcConditions?: {
+      enabled: boolean;
+      groups?: Array<{
+        id: string;
+        name?: string;
+        logicOperator?: 'AND' | 'OR';
+        conditions: Array<{
+          id?: string;
+          fieldId: string;
+          valueType: 'number' | 'text';
+          numOperator?: string;
+          threshold?: number;
+          thresholdMax?: number;
+          textOperator?: string;
+          textValue?: string;
+        }>;
+        targetFieldIds: string[];
+        referenceFieldId?: string;
+        rules?: Array<{ targetFieldId: string; threshold: number; operator?: string }>;
+      }>;
+      referenceFieldId?: string;
+      rules?: Array<{ targetFieldId: string; threshold: number; operator?: string }>;
+    };
+    customNpcConditions?: {
+      enabled: boolean;
+      groups?: Array<{
+        id: string;
+        name?: string;
+        logicOperator?: 'AND' | 'OR';
+        conditions: Array<{
+          id?: string;
+          fieldId: string;
+          valueType: 'number' | 'text';
+          numOperator?: string;
+          threshold?: number;
+          thresholdMax?: number;
+          textOperator?: string;
+          textValue?: string;
+        }>;
+        targetFieldIds: string[];
+        referenceFieldId?: string;
+        rules?: Array<{ targetFieldId: string; threshold: number; operator?: string }>;
+      }>;
+      referenceFieldId?: string;
+      rules?: Array<{ targetFieldId: string; threshold: number; operator?: string }>;
+    };
     mcData: {
       name: string;
       fullName: string;
