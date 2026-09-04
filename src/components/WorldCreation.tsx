@@ -2993,6 +2993,7 @@ LƯU Ý QUAN TRỌNG: Hãy tạo ra ĐỦ số lượng Location như được y
                                       <li><b>Yêu cầu với AI:</b> Yêu cầu chi tiết về cách viết, độ dài, phong cách cho AI (VD: "Viết 2-3 câu ngắn gọn, bám sát bối cảnh").</li>
                                       <li><b>Loại:</b> "Dòng ngắn" cho dữ liệu ít chữ (Tên, Tuổi), "Nhiều dòng" cho đoạn văn dài (Tiểu sử).</li>
                                       <li><b>Tạo mảng (Array Mode):</b> Khi tích chọn "Tạo mảng", AI sẽ tạo ra dữ liệu dưới dạng một mảng (danh sách) các đối tượng thay vì một ô văn bản duy nhất. Trong mảng này, bạn có thể hướng dẫn AI tạo ra nhiều trường nhỏ (sub-fields) bằng cách định nghĩa rõ cấu trúc mong muốn trong phần "Hướng dẫn định nghĩa" hoặc "Yêu cầu với AI" (Ví dụ: <i>Mảng "Kỹ năng" chứa các trường nhỏ: Tên chiêu thức, Sức sát thương, Mô tả hiệu ứng...</i>).</li>
+                                      <li><b>Cơ chế kích hoạt điều kiện:</b> Cho phép bạn cấu hình để hiển thị động (bật/tắt) các trường phụ thuộc dựa trên giá trị của một "Trường Tham Chiếu (Gốc)" là số (Ví dụ: Nếu trường "Cấp độ" &gt;= 10, hiển thị trường "Kỹ năng Thức Tỉnh").</li>
                                     </ul>
                                   </div>
                                 )}
@@ -4043,6 +4044,7 @@ LƯU Ý QUAN TRỌNG: Hãy tạo ra ĐỦ số lượng Location như được y
                                   <li><b>Yêu cầu với AI:</b> Yêu cầu chi tiết về cách viết, độ dài, phong cách cho AI (VD: "Viết 2-3 câu ngắn gọn, bám sát bối cảnh").</li>
                                   <li><b>Loại:</b> "Dòng ngắn" cho dữ liệu ít chữ (Tên, Tuổi), "Nhiều dòng" cho đoạn văn dài (Tiểu sử).</li>
                                   <li><b>Tạo mảng (Array Mode):</b> Khi tích chọn "Tạo mảng", AI sẽ tạo ra dữ liệu dưới dạng một mảng (danh sách) các đối tượng thay vì một ô văn bản duy nhất. Trong mảng này, bạn có thể hướng dẫn AI tạo ra nhiều trường nhỏ (sub-fields) bằng cách định nghĩa rõ cấu trúc mong muốn trong phần "Hướng dẫn định nghĩa" hoặc "Yêu cầu với AI" (Ví dụ: <i>Mảng "Kỹ năng" chứa các trường nhỏ: Tên chiêu thức, Sức sát thương, Mô tả hiệu ứng...</i>).</li>
+                                  <li><b>Cơ chế kích hoạt điều kiện:</b> Cho phép bạn cấu hình để hiển thị động (bật/tắt) các trường phụ thuộc dựa trên giá trị của một "Trường Tham Chiếu (Gốc)" là số (Ví dụ: Nếu trường "Cấp độ" &gt;= 10, hiển thị trường "Kỹ năng Thức Tỉnh").</li>
                                 </ul>
                               </div>
                             )}

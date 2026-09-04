@@ -560,3 +560,12 @@ body {
   }
 }
 
+
+
+/* Force Color Scheme */
+html {
+  color-scheme: light;
+}
+html.dark, html.dark-theme {
+  color-scheme: dark;
+}

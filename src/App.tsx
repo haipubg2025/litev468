@@ -41,6 +41,18 @@ function InnerApp() {
   const isDark = theme.group === 'Dark';
 
   useEffect(() => {
+    if (theme.group === 'Dark') {
+      document.documentElement.classList.add('dark', 'dark-theme');
+      document.documentElement.style.colorScheme = 'dark';
+      document.body.style.backgroundColor = '#000000';
+    } else {
+      document.documentElement.classList.remove('dark', 'dark-theme');
+      document.documentElement.style.colorScheme = 'light';
+      document.body.style.backgroundColor = '#FFFFFF';
+    }
+  }, [theme.group]);
+
+  useEffect(() => {
     if (location.pathname === '/' && isMobile) {
       if (location.state && (location.state as any).fromMenu) {
         // Came from sidebar, don't open sidebar
