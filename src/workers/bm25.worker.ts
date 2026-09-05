@@ -13,14 +13,14 @@ const STOP_WORDS = new Set([
 ]);
 
 // 2. Chuyển đổi bỏ dấu tiếng Việt để đối sánh không dấu (Accent-insensitive)
-function removeVietnameseTones(str: string): string {
+function removeVietnameseTones(str: string, keepCase: boolean = false): string {
   if (!str) return '';
-  return str
+  const res = str
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/đ/g, 'd')
-    .replace(/Đ/g, 'D')
-    .toLowerCase();
+    .replace(/Đ/g, 'D');
+  return keepCase ? res : res.toLowerCase();
 }
 
 // 3. Token ID Hashing: Chuyển string thành Integer ID để tiết kiệm bộ nhớ và tăng tốc độ xử lý
@@ -38,41 +38,70 @@ function getTokenId(token: string, addIfMissing: boolean = true): number | undef
 
 // 4. Tokenizer: Sinh Word Unigrams, Bigrams, Trigrams (kèm phiên bản không dấu)
 function tokenizeWords(text: string, addIfMissing: boolean = true): number[] {
-  const cleanText = text.toLowerCase().replace(/[^\p{L}\p{N}\s_]/gu, ' ');
-  const words = cleanText.split(/\s+/).filter(w => w.length > 0 && !STOP_WORDS.has(w));
+  const cleanTextLower = text.toLowerCase().replace(/[^\p{L}\p{N}\s_]/gu, ' ');
+  const cleanTextExact = text.replace(/[^\p{L}\p{N}\s_]/gu, ' ');
+  
+  const wordsLower = cleanTextLower.split(/\s+/).filter(w => w.length > 0 && !STOP_WORDS.has(w));
+  const wordsExact = cleanTextExact.split(/\s+/).filter(w => w.length > 0 && !STOP_WORDS.has(w.toLowerCase()));
+  
   const tokens: number[] = [];
 
   // Single word tokens (Unigrams)
-  for (const w of words) {
-    const id = getTokenId(w, addIfMissing);
+  for (let i = 0; i < wordsLower.length; i++) {
+    const wL = wordsLower[i];
+    const wE = wordsExact[i];
+    
+    const id = getTokenId(wL, addIfMissing);
     if (id !== undefined) tokens.push(id);
 
+    // Tokens phân biệt chữ hoa/thường (Exact Case Boost)
+    if (wE !== wL) {
+      const idEx = getTokenId(`ex_${wE}`, addIfMissing);
+      if (idEx !== undefined) tokens.push(idEx);
+    }
+
     // Thêm bản không dấu nếu khác bản có dấu
-    const noTone = removeVietnameseTones(w);
-    if (noTone !== w && noTone.length > 0) {
+    const noTone = removeVietnameseTones(wL);
+    if (noTone !== wL && noTone.length > 0) {
       const ntId = getTokenId(`nt_${noTone}`, addIfMissing);
       if (ntId !== undefined) tokens.push(ntId);
     }
   }
 
   // 2-word combinations (Bigrams)
-  for (let i = 0; i < words.length - 1; i++) {
-    const bigram = `${words[i]}_${words[i + 1]}`;
-    const id = getTokenId(bigram, addIfMissing);
+  for (let i = 0; i < wordsLower.length - 1; i++) {
+    const bigramL = `${wordsLower[i]}_${wordsLower[i + 1]}`;
+    const bigramE = `${wordsExact[i]}_${wordsExact[i + 1]}`;
+    
+    const id = getTokenId(bigramL, addIfMissing);
     if (id !== undefined) tokens.push(id);
 
-    const noToneBigram = removeVietnameseTones(bigram);
-    if (noToneBigram !== bigram) {
+    // Tokens phân biệt chữ hoa/thường (Exact Case Boost)
+    if (bigramE !== bigramL) {
+      const idEx = getTokenId(`ex_${bigramE}`, addIfMissing);
+      if (idEx !== undefined) tokens.push(idEx);
+    }
+
+    const noToneBigram = removeVietnameseTones(bigramL);
+    if (noToneBigram !== bigramL) {
       const ntId = getTokenId(`nt_${noToneBigram}`, addIfMissing);
       if (ntId !== undefined) tokens.push(ntId);
     }
   }
 
   // 3-word combinations (Trigrams cho các thuật ngữ cụm từ ghép nhập vai)
-  for (let i = 0; i < words.length - 2; i++) {
-    const trigram = `${words[i]}_${words[i + 1]}_${words[i + 2]}`;
-    const id = getTokenId(trigram, addIfMissing);
+  for (let i = 0; i < wordsLower.length - 2; i++) {
+    const trigramL = `${wordsLower[i]}_${wordsLower[i + 1]}_${wordsLower[i + 2]}`;
+    const trigramE = `${wordsExact[i]}_${wordsExact[i + 1]}_${wordsExact[i + 2]}`;
+    
+    const id = getTokenId(trigramL, addIfMissing);
     if (id !== undefined) tokens.push(id);
+    
+    // Tokens phân biệt chữ hoa/thường (Exact Case Boost)
+    if (trigramE !== trigramL) {
+      const idEx = getTokenId(`ex_${trigramE}`, addIfMissing);
+      if (idEx !== undefined) tokens.push(idEx);
+    }
   }
 
   return tokens;
@@ -86,26 +115,41 @@ interface SparseVector {
 }
 
 function createCharacterTrigramVector(text: string, addIfMissing: boolean = true): SparseVector {
-  const normalized = text.toLowerCase().replace(/\s+/g, ' ').trim();
+  const normalizedLower = text.toLowerCase().replace(/\s+/g, ' ').trim();
+  const normalizedExact = text.replace(/\s+/g, ' ').trim();
   const counts = new Map<number, number>();
 
-  // Cắt chuỗi thành các cụm 3 ký tự liên tiếp
-  for (let i = 0; i <= normalized.length - 3; i++) {
-    const tri = normalized.substring(i, i + 3);
+  // Cắt chuỗi thành các cụm 3 ký tự liên tiếp (Bản Lowercase - Nhạy cao)
+  for (let i = 0; i <= normalizedLower.length - 3; i++) {
+    const tri = normalizedLower.substring(i, i + 3);
     const id = getTokenId(`chr3_${tri}`, addIfMissing);
     if (id !== undefined) {
-      counts.set(id, (counts.get(id) || 0) + 1);
+      counts.set(id, (counts.get(id) || 0) + 1.0);
     }
   }
 
   // Thêm phiên bản không dấu để hỗ trợ tìm kiếm mờ
-  const noTone = removeVietnameseTones(normalized);
-  if (noTone !== normalized) {
+  const noTone = removeVietnameseTones(normalizedLower);
+  if (noTone !== normalizedLower) {
     for (let i = 0; i <= noTone.length - 3; i++) {
       const tri = noTone.substring(i, i + 3);
       const id = getTokenId(`chr3_nt_${tri}`, addIfMissing);
       if (id !== undefined) {
         counts.set(id, (counts.get(id) || 0) + 0.7); // Trọng số nhỏ hơn một chút cho bản không dấu
+      }
+    }
+  }
+  
+  // Thêm phiên bản Exact Case phân biệt chữ Hoa/Thường
+  if (normalizedExact !== normalizedLower) {
+    for (let i = 0; i <= normalizedExact.length - 3; i++) {
+      const tri = normalizedExact.substring(i, i + 3);
+      const triLower = normalizedLower.substring(i, i + 3);
+      if (tri !== triLower) {
+        const id = getTokenId(`chr3_ex_${tri}`, addIfMissing);
+        if (id !== undefined) {
+          counts.set(id, (counts.get(id) || 0) + 1.2); // Trọng số cao hơn cho match chính xác hoa/thường
+        }
       }
     }
   }
@@ -314,10 +358,12 @@ self.onmessage = (e: MessageEvent) => {
 
         // 3. Substring & Exact Match Boost
         let substringBoost = 0;
-        if (queryLower.length > 2 && memTextLower.includes(queryLower)) {
-          substringBoost += 4.0;
+        if (query.length > 2 && memory.text.includes(query)) {
+          substringBoost += 6.0; // Điểm thưởng rất lớn cho việc match chính xác tuyệt đối cả Hoa/Thường và Dấu
+        } else if (queryLower.length > 2 && memTextLower.includes(queryLower)) {
+          substringBoost += 4.0; // Match chính xác chuỗi nhưng khác hoa/thường
         } else if (queryNoTone.length > 2 && memTextNoTone.includes(queryNoTone)) {
-          substringBoost += 2.5;
+          substringBoost += 2.5; // Match mờ không dấu
         }
 
         // 4. Entity Matching Boost (Tên NPC, Địa điểm, Bảo vật)

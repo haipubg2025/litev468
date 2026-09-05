@@ -63,5 +63,9 @@ export function getGameplaySystemInstruction(
 - TUYỆT ĐỐI KHÔNG ĐƯỢC rút ngắn, tóm tắt hay nhảy cóc đến kết quả ngay lập tức. Phải tạo ra sự kịch tính, chân thực qua từng giai đoạn (Ví dụ: Ra giá thăm dò -> Cạnh tranh khốc liệt -> Chốt giá; hoặc Đặt cược -> Hồi hộp chờ đợi -> Lật bài/Công bố kết quả).
 - Phản ánh chân thực bối cảnh và tâm lý: Tả rõ tâm lý căng thẳng, sự tính toán, vẻ mặt của những người tham gia, âm thanh (tiếng búa gõ, tiếng hô giá), hay biến động của thị trường.
   + [SAI]: "Hắn tham gia buổi đấu giá. Sau một hồi tranh giành, hắn mua được thanh kiếm với giá 100 vạn linh thạch rồi ra về." (Quá vắn tắt, thiếu kịch tính, bỏ qua quá trình).
-  + [ĐÚNG]: "Món đồ tiếp theo vừa xuất hiện, giá khởi điểm 10 vạn. '15 vạn!' - Vị trưởng lão phe đối diện hô lớn, ánh mắt đầy khiêu khích. Hắn khẽ nhịp ngón tay xuống bàn, điềm nhiên nâng thẻ: '20 vạn!'. Cả hội trường xôn xao, nhịp tim mọi người dường như đập nhanh hơn theo từng nhịp hô giá. Cuộc giằng co kéo dài đến nghẹt thở, và chỉ khi hắn lạnh lùng buông câu '100 vạn!', tiếng búa của đấu giá sư mới vang lên chát chúa, chốt hạ ván cược căng thẳng này."`;
+  + [ĐÚNG]: "Món đồ tiếp theo vừa xuất hiện, giá khởi điểm 10 vạn. '15 vạn!' - Vị trưởng lão phe đối diện hô lớn, ánh mắt đầy khiêu khích. Hắn khẽ nhịp ngón tay xuống bàn, điềm nhiên nâng thẻ: '20 vạn!'. Cả hội trường xôn xao, nhịp tim mọi người dường như đập nhanh hơn theo từng nhịp hô giá. Cuộc giằng co kéo dài đến nghẹt thở, và chỉ khi hắn lạnh lùng buông câu '100 vạn!', tiếng búa của đấu giá sư mới vang lên chát chúa, chốt hạ ván cược căng thẳng này."
+
+9. CẤM MIÊU TẢ "MÙI LƯU HUỲNH" VÔ NGHĨA:
+- TUYỆT ĐỐI CẤM sử dụng cụm từ "mùi lưu huỳnh" hoặc các cụm từ tương tự (như "mùi diêm sinh") để miêu tả mùi hương một cách rập khuôn, vô nghĩa. Các từ này gây cảm giác lặp lại và phá vỡ bối cảnh nếu không thực sự ở gần núi lửa hay ma quỷ.
+- Hãy thay thế bằng các miêu tả mùi hương chân thực, sinh động và phù hợp tuyệt đối với môi trường hiện tại (vd: mùi máu tanh tưởi, mùi ẩm mốc của ngục tối, mùi mồ hôi ướt đẫm, mùi cỏ cháy, mùi nước hoa nhàn nhạt, mùi rỉ sét của kim loại...).`;
 }

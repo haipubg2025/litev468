@@ -276,16 +276,11 @@ export default function Settings() {
     e.target.value = '';
   };
 
-  const handleLoadAllModels = async () => {
-    if (proxies.length === 0) {
-      toast.info('Không có proxy nào để load models');
-      return;
-    }
-
+  const loadModelsForProxies = async (targetProxies: ProxyConfig[]) => {
     setIsLoadingAllModels(true);
     let successCount = 0;
     
-    await Promise.all(proxies.map(async (proxy) => {
+    await Promise.all(targetProxies.map(async (proxy) => {
       try {
         let baseUrl = proxy.url.trim().replace(/\/+$/, '');
         
@@ -447,8 +442,14 @@ export default function Settings() {
           return;
         }
         
-        // Sắp xếp tự động danh sách models theo đúng yêu cầu
-        const sortedModels = sortModels(models);
+        // Sắp xếp tự động danh sách models theo đúng yêu cầu: Ưu tiên models có chữ 'pro'
+        const sortedModels = sortModels(models).sort((a, b) => {
+          const aIsPro = a.toLowerCase().includes('pro');
+          const bIsPro = b.toLowerCase().includes('pro');
+          if (aIsPro && !bIsPro) return -1;
+          if (!aIsPro && bIsPro) return 1;
+          return 0;
+        });
         
         let newSelectedModel = proxy.selectedModel;
         if (!newSelectedModel || !sortedModels.includes(newSelectedModel)) {
@@ -466,8 +467,17 @@ export default function Settings() {
     }));
 
     setIsLoadingAllModels(false);
-    if (successCount > 0) {
-      toast.success(`Đã tải models thành công cho ${successCount}/${proxies.length} proxy`);
+    return successCount;
+  };
+
+  const handleLoadAllModels = async () => {
+    if (proxies.length === 0) {
+      toast.info('Không có proxy nào để load models');
+      return;
+    }
+    const count = await loadModelsForProxies(proxies);
+    if (count > 0) {
+      toast.success(`Đã tải models thành công cho ${count}/${proxies.length} proxy`);
     } else {
       toast.error('Không thể tải models cho proxy nào');
     }
@@ -504,7 +514,8 @@ export default function Settings() {
       };
       addProxy(newProxy);
       setProxyForm({ url: '', key: '', format: 'auto' });
-      toast.success(`Kết nối thành công và đã lưu Proxy ${proxies.length}`);
+      toast.success(`Kết nối thành công và đã lưu Proxy ${proxies.length + 1}`);
+      loadModelsForProxies([newProxy]);
     } catch (error) {
       toast.error('Không thể kết nối tới proxy này');
     } finally {
@@ -594,15 +605,20 @@ export default function Settings() {
         }
       }
 
-      proxyPairs.forEach((pair, i) => {
-          addProxy({
+      const newProxies = proxyPairs.map((pair, i) => {
+          const newProxy: ProxyConfig = {
             id: Math.random().toString(36).substring(7),
             name: `Proxy nhập từ TXT ${Math.floor(Math.random()*1000)}`,
             url: pair.url,
             key: pair.key,
             createdAt: Date.now()
-          });
+          };
+          addProxy(newProxy);
+          return newProxy;
       });
+      if (newProxies.length > 0) {
+        loadModelsForProxies(newProxies);
+      }
 
       if (geminiKeys.length > 0 || proxyPairs.length > 0) {
         toast.success(`Đã trích xuất thành công: ${geminiKeys.length > 0 ? geminiKeys.length + ' Gemini Key ' : ''}${proxyPairs.length > 0 ? (geminiKeys.length > 0 ? '& ' : '') + proxyPairs.length + ' Proxy ' : ''}từ tệp TXT!`);
